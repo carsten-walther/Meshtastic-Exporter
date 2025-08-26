@@ -1,0 +1,65 @@
+services:
+
+  mysql:
+    container_name: mysql
+    image: mysql
+    restart: unless-stopped
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_PASSWORD}
+    ports:
+      - 3306:3306
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - db
+
+  phpmyadmin:
+    container_name: phpmyadmin
+    image: phpmyadmin:5
+    restart: unless-stopped
+    environment:
+      - PMA_USER=${MYSQL_USER}
+      - PMA_PASSWORD=${MYSQL_PASSWORD}
+      - PMA_HOST=${MYSQL_HOST}
+      - PMA_PORT=${MYSQL_PORT}
+      - PMA_ARBITRARY=1
+    ports:
+      - 8080:80
+    depends_on:
+      - mysql
+    links:
+      - mysql
+    networks:
+      - db
+
+  meshtastic:
+    container_name: meshtastic
+    image: python:3-alpine
+    #restart: unless-stopped
+    environment:
+      - INTERFACE=${INTERFACE}
+      - INTERFACE_PORT=${INTERFACE_PORT}
+      - INTERFACE_HOST=${INTERFACE_HOST}
+      - INTERFACE_ADDR=${INTERFACE_ADDR}
+
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_HOST=${MYSQL_HOST}
+      - MYSQL_PORT=${MYSQL_PORT}
+      - MYSQL_TABLE=${MYSQL_TABLE}
+    depends_on:
+      - mysql
+    links:
+      - mysql
+    volumes:
+      - ./app:/app
+    command: sh -c "apk add --update --no-cache gcc libc-dev libffi-dev && pip install -r /app/requirements.txt && python3 -u /app/main.py"
+    networks:
+      - db
+
+networks:
+  db:
+    driver: bridge
+
+volumes:
+  mysql_data:

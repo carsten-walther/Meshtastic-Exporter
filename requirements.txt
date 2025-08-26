@@ -1,0 +1,8 @@
+dotenv==0.9.9
+meshtastic==2.7.1
+Pypubsub==4.0.3
+pyserial==3.5
+mysql_connector_python==9.4.0
+unishox2-py3==1.0.0
+cryptography==45.0.6
+Pyrebase4==4.8.0
