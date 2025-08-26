@@ -195,14 +195,14 @@ class DatabaseHandler:
                         cur.execute("""
                                     INSERT INTO node_details (node_id, short_name, long_name, hardware_model, role)
                                     VALUES (%s, %s, %s, %s, %s)
-                                    ON CONFLICT (node_id) DO NOTHING
+                                    ON DUPLICATE KEY UPDATE node_id=node_id
                                     """, (source_id, 'Broadcast', 'Broadcast', 'BROADCAST', 'BROADCAST'))
                     else:
                         # Insert unknown node for source_id
                         cur.execute("""
                                     INSERT INTO node_details (node_id, short_name, long_name)
                                     VALUES (%s, %s, %s)
-                                    ON CONFLICT (node_id) DO NOTHING
+                                    ON DUPLICATE KEY UPDATE node_id=node_id
                                     """, (source_id, 'Unknown', 'Unknown'))
 
                 # Check if destination_id exists in node_details, if not insert it
@@ -213,14 +213,14 @@ class DatabaseHandler:
                         cur.execute("""
                                     INSERT INTO node_details (node_id, short_name, long_name, hardware_model, role)
                                     VALUES (%s, %s, %s, %s, %s)
-                                    ON CONFLICT (node_id) DO NOTHING
+                                    ON DUPLICATE KEY UPDATE node_id=node_id
                                     """, (destination_id, 'Broadcast', 'Broadcast', 'BROADCAST', 'BROADCAST'))
                     else:
                         # Insert unknown node for destination_id
                         cur.execute("""
                                     INSERT INTO node_details (node_id, short_name, long_name)
                                     VALUES (%s, %s, %s)
-                                    ON CONFLICT (node_id) DO NOTHING
+                                    ON DUPLICATE KEY UPDATE node_id=node_id
                                     """, (destination_id, 'Unknown', 'Unknown'))
 
                 # Now insert into mesh_packet_metrics

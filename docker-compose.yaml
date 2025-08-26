@@ -11,7 +11,22 @@ services:
     volumes:
       - mysql_data:/var/lib/mysql
     networks:
-      - db
+      - bridge
+
+  grafana:
+    container_name: grafana
+    image: grafana/grafana-oss:11.2.7
+    restart: unless-stopped
+    ports:
+      - 3000:3000
+    networks:
+      - bridge
+    volumes:
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - mysql
+    links:
+      - mysql
 
   phpmyadmin:
     container_name: phpmyadmin
@@ -30,7 +45,7 @@ services:
     links:
       - mysql
     networks:
-      - db
+      - bridge
 
   meshtastic:
     container_name: meshtastic
@@ -52,14 +67,15 @@ services:
     links:
       - mysql
     volumes:
-      - ./app:/app
+      - ./:/app
     command: sh -c "apk add --update --no-cache gcc libc-dev libffi-dev && pip install -r /app/requirements.txt && python3 -u /app/main.py"
     networks:
-      - db
+      - bridge
 
 networks:
-  db:
+  bridge:
     driver: bridge
 
 volumes:
+  grafana_data:
   mysql_data:

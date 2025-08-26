@@ -6,12 +6,10 @@ import os
 
 from meshtastic.protobuf.portnums_pb2 import PortNum
 
-from app.processors.processor import Processor
-from app.processors.unknown_app_processor import UnknownAppProcessor
-
 
 class ProcessorRegistry:
     _registry = {}
+    _initialized = False
 
     @classmethod
     def register_processor(cls, port_num):
@@ -27,5 +25,15 @@ class ProcessorRegistry:
         return inner_wrapper
 
     @classmethod
-    def get_processor(cls, port_num) -> type(Processor):
+    def get_processor(cls, port_num):
+        # Lazy initialization
+        if not cls._initialized:
+            cls._initialize_processors()
+            cls._initialized = True
+
+        from app.processors.unknown_app_processor import UnknownAppProcessor
         return cls._registry.get(port_num, UnknownAppProcessor)
+
+    @classmethod
+    def _initialize_processors(cls):
+        pass
