@@ -102,7 +102,7 @@ class MessageProcessor:
             node_id_str = str(node_id)
             # Insert the broadcast node into node_details if it doesn't exist
             with self.db_pool.get_connection() as conn:
-                with conn.cursor() as cur:
+                with conn.cursor(buffered=True) as cur:
                     cur.execute("""
                                 INSERT INTO node_details (node_id, short_name, long_name, hardware_model, role)
                                 VALUES (%s, %s, %s, %s, %s)
@@ -112,7 +112,7 @@ class MessageProcessor:
             return ClientDetails(node_id=node_id_str, short_name='Broadcast', long_name='Broadcast')
         node_id_str = str(node_id)  # Convert the integer to a string
         with self.db_pool.get_connection() as conn:
-            with conn.cursor() as cur:
+            with conn.cursor(buffered=True) as cur:
                 # First, try to select the existing record
                 cur.execute("""
                     SELECT node_id, short_name, long_name, hardware_model, role 

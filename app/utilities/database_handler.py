@@ -19,7 +19,7 @@ class DatabaseHandler:
 
     def execute_db_operation(self, operation):
         with self.db_pool.get_connection() as conn:
-            with conn.cursor() as cur:
+            with conn.cursor(buffered=True) as cur:
                 return operation(cur, conn)
 
     def store_device_metrics(self, node_id: str, metrics: Dict[str, Any]):
@@ -41,7 +41,7 @@ class DatabaseHandler:
         placeholders = ", ".join(["%s"] * len(values))
 
         with self.db_pool.get_connection() as conn:
-            with conn.cursor() as cur:
+            with conn.cursor(buffered=True) as cur:
                 cur.execute(f"""
                     INSERT INTO device_metrics (
                         {columns_str}
@@ -70,7 +70,7 @@ class DatabaseHandler:
         placeholders = ", ".join(["%s"] * len(values))
 
         with self.db_pool.get_connection() as conn:
-            with conn.cursor() as cur:
+            with conn.cursor(buffered=True) as cur:
                 cur.execute(f"""
                     INSERT INTO environment_metrics (
                         {columns_str}
@@ -99,7 +99,7 @@ class DatabaseHandler:
         placeholders = ", ".join(["%s"] * len(values))
 
         with self.db_pool.get_connection() as conn:
-            with conn.cursor() as cur:
+            with conn.cursor(buffered=True) as cur:
                 cur.execute(f"""
                     INSERT INTO air_quality_metrics (
                         {columns_str}
@@ -128,7 +128,7 @@ class DatabaseHandler:
         placeholders = ", ".join(["%s"] * len(values))
 
         with self.db_pool.get_connection() as conn:
-            with conn.cursor() as cur:
+            with conn.cursor(buffered=True) as cur:
                 cur.execute(f"""
                     INSERT INTO power_metrics (
                         {columns_str}
@@ -157,7 +157,7 @@ class DatabaseHandler:
         placeholders = ", ".join(["%s"] * len(values))
 
         with self.db_pool.get_connection() as conn:
-            with conn.cursor() as cur:
+            with conn.cursor(buffered=True) as cur:
                 cur.execute(f"""
                     INSERT INTO pax_counter_metrics (
                         {columns_str}
@@ -186,7 +186,7 @@ class DatabaseHandler:
         placeholders = ", ".join(["%s"] * len(values))
 
         with self.db_pool.get_connection() as conn:
-            with conn.cursor() as cur:
+            with conn.cursor(buffered=True) as cur:
                 # Check if source_id exists in node_details, if not insert it
                 cur.execute("SELECT 1 FROM node_details WHERE node_id = %s", (source_id,))
                 if not cur.fetchone():
@@ -236,7 +236,7 @@ class DatabaseHandler:
     def get_latest_metrics(self, node_id: str) -> Dict[str, Any]:
         """Get the latest metrics for a node from the node_telemetry view"""
         with self.db_pool.get_connection() as conn:
-            with conn.cursor() as cur:
+            with conn.cursor(buffered=True) as cur:
                 cur.execute("""
                             SELECT *
                             FROM node_telemetry

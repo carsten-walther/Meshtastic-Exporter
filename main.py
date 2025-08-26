@@ -18,6 +18,102 @@ from app.utilities.interface import Interface
 # https://github.com/tcivie/meshtastic-metrics-exporter
 #
 
+def string_to_portnum(portnum_string):
+    """Konvertiert einen PortNum-String zu einem PortNum-Enum"""
+    try:
+        # Versuche direkten Zugriff auf das Enum
+        if hasattr(PortNum, portnum_string):
+            return getattr(PortNum, portnum_string)
+
+        # Falls der String bereits numerisch ist
+        if portnum_string.isdigit():
+            return int(portnum_string)
+
+        # Mapping für häufige String-Varianten
+        portnum_mapping = {
+            'TEXT_MESSAGE_APP': PortNum.TEXT_MESSAGE_APP,
+            'NODEINFO_APP': PortNum.NODEINFO_APP,
+            'POSITION_APP': PortNum.POSITION_APP,
+            'TELEMETRY_APP': PortNum.TELEMETRY_APP,
+            'ROUTING_APP': PortNum.ROUTING_APP,
+            'ADMIN_APP': PortNum.ADMIN_APP,
+            'WAYPOINT_APP': PortNum.WAYPOINT_APP,
+            'AUDIO_APP': PortNum.AUDIO_APP,
+            'DETECTION_SENSOR_APP': PortNum.DETECTION_SENSOR_APP,
+            'REPLY_APP': PortNum.REPLY_APP,
+            'IP_TUNNEL_APP': PortNum.IP_TUNNEL_APP,
+            'PAXCOUNTER_APP': PortNum.PAXCOUNTER_APP,
+            'SERIAL_APP': PortNum.SERIAL_APP,
+            'STORE_FORWARD_APP': PortNum.STORE_FORWARD_APP,
+            'RANGE_TEST_APP': PortNum.RANGE_TEST_APP,
+            'TRACEROUTE_APP': PortNum.TRACEROUTE_APP,
+            'NEIGHBORINFO_APP': PortNum.NEIGHBORINFO_APP,
+            'ATAK_PLUGIN': PortNum.ATAK_PLUGIN,
+            'MAP_REPORT_APP': PortNum.MAP_REPORT_APP,
+            'PRIVATE_APP': PortNum.PRIVATE_APP,
+            'ATAK_FORWARDER': PortNum.ATAK_FORWARDER,
+        }
+
+        return portnum_mapping.get(portnum_string.upper(), PortNum.UNKNOWN_APP)
+
+    except Exception as e:
+        logging.warning(f"Failed to convert portnum '{portnum_string}': {e}")
+        return PortNum.UNKNOWN_APP
+
+def dict_to_mesh_packet(packet_dict):
+    mesh_packet = MeshPacket()
+
+    field_mapping = {
+        'to': ('to', int, 0),
+        'from': ('from', int, 0),
+        'id': ('id', int, 0),
+        'rx_time': ('rx_time', int, 0),
+        'rx_snr': ('rx_snr', float, 0.0),
+        'hop_limit': ('hop_limit', int, 0),
+        'rx_rssi': ('rx_rssi', int, 0),
+        'hop_start': ('hop_start', int, 0),
+        'channel': ('channel', int, 0),
+        'want_ack': ('want_ack', bool, False),
+        'via_mqtt': ('via_mqtt', bool, False),
+    }
+
+    for key, (attr, type_func, default) in field_mapping.items():
+        if key in packet_dict:
+            try:
+                if attr == 'from':
+                    setattr(mesh_packet, 'from', type_func(packet_dict[key]))
+                else:
+                    setattr(mesh_packet, attr, type_func(packet_dict[key]))
+            except (ValueError, TypeError) as e:
+                logging.warning(f"Failed to set {attr}: {e}")
+                setattr(mesh_packet, attr, default)
+
+    if 'decoded' in packet_dict and packet_dict['decoded']:
+        data = Data()
+        decoded = packet_dict['decoded']
+
+        if 'portnum' in decoded:
+            data.portnum = string_to_portnum(decoded['portnum'])
+        if 'payload' in decoded:
+            payload = decoded['payload']
+            if isinstance(payload, str):
+                data.payload = payload.encode('utf-8')
+            elif isinstance(payload, bytes):
+                data.payload = payload
+
+        mesh_packet.decoded.CopyFrom(data)
+
+    # Encrypted-Daten
+    if 'encrypted' in packet_dict and packet_dict['encrypted']:
+        if isinstance(packet_dict['encrypted'], str):
+            mesh_packet.encrypted = packet_dict['encrypted'].encode('utf-8')
+        else:
+            mesh_packet.encrypted = bytes(packet_dict['encrypted'])
+
+    print(mesh_packet)
+    return mesh_packet
+
+
 def connection_established():
     logging.info(f"Connection established")
 
@@ -30,33 +126,9 @@ def node_updated():
 def receive(packet, interface):
     logging.info(f"New packet received")
     try:
-        mesh_packet = MeshPacket()
-
-        mesh_packet.to = int(packet.get('to', 0))
-        mesh_packet.channel = int(packet.get('channel', 0))
-        #mesh_packet.decoded = packet['decoded']
-        mesh_packet.encrypted = bytes(packet.get('encrypted', b""))
-        mesh_packet.id = int(packet.get('id', 0))
-        mesh_packet.rx_time = int(packet.get('rx_time', 0))
-        mesh_packet.rx_snr = float(packet.get('rx_snr', .0))
-        mesh_packet.hop_limit = int(packet.get('hop_limit', 0))
-        mesh_packet.want_ack = bool(packet.get('want_ack', True))
-        #mesh_packet.priority = packet['priority']
-        mesh_packet.rx_rssi = int(packet.get('rx_rssi', 0))
-        #mesh_packet.delayed = packet['delayed']
-        mesh_packet.via_mqtt = bool(packet.get('via_mqtt', False))
-        mesh_packet.hop_start = int(packet.get('hop_start', 0))
-        mesh_packet.public_key = bytes(packet.get('public_key', b""))
-        mesh_packet.pki_encrypted = bool(packet.get('pki_encrypted', False))
-        mesh_packet.next_hop = int(packet.get('next_hop', 0))
-        mesh_packet.relay_node = int(packet.get('relay_node', 0))
-        mesh_packet.tx_after = int(packet.get('tx_after', 0))
-        #mesh_packet.transport_mechanism = packet['transport_mechanism']
-
-        print(mesh_packet)
-
+        mesh_packet = dict_to_mesh_packet(packet)
         with connection_pool.get_connection() as conn:
-            with conn.cursor() as cur:
+            with conn.cursor(buffered=True) as cur:
                 cur.execute("""
                             SELECT id FROM messages WHERE id = %s
                             """, (str(mesh_packet.id),))
@@ -102,6 +174,7 @@ if __name__ == '__main__':
     # Configure the Processor
     processor = MessageProcessor(connection_pool)
 
+    # Load interface and connect
     interface = Interface()
     interface.connect()
 
