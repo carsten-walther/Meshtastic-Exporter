@@ -232,7 +232,7 @@ CREATE TABLE `mesh_packet_metrics` (
   `portnum` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `packet_id` bigint DEFAULT NULL,
   `channel` int DEFAULT NULL,
-  `rx_time` bigint DEFAULT NULL,
+  `rx_time` int DEFAULT NULL,
   `rx_snr` float DEFAULT NULL,
   `rx_rssi` float DEFAULT NULL,
   `hop_limit` int DEFAULT NULL,
@@ -313,7 +313,7 @@ CREATE TABLE `node_details` (
   `longitude` int DEFAULT NULL,
   `latitude` int DEFAULT NULL,
   `altitude` int DEFAULT NULL,
-  `precision_val` int DEFAULT NULL,
+  `precision` int DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;

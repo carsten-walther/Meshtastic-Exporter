@@ -10,23 +10,24 @@ services:
       - 3306:3306
     volumes:
       - mysql_data:/var/lib/mysql
-      - ./schema.sql:/docker-entrypoint-initdb.d/schema.sql
+      - ./docker/mysql/schema.sql:/docker-entrypoint-initdb.d/schema.sql
     networks:
       - bridge
 
   grafana:
+    build:
+      context: .
+      dockerfile: ./docker/grafana/Dockerfile
     container_name: grafana
-    image: grafana/grafana-oss:11.2.7
     restart: unless-stopped
     ports:
       - 3000:3000
-    networks:
-      - bridge
     volumes:
       - grafana_data:/var/lib/grafana
+      - ./docker/grafana/provisioning:/etc/grafana/provisioning
+    networks:
+      - bridge
     depends_on:
-      - mysql
-    links:
       - mysql
 
   phpmyadmin:
@@ -41,17 +42,17 @@ services:
       - PMA_ARBITRARY=1
     ports:
       - 8080:80
-    depends_on:
-      - mysql
-    links:
-      - mysql
     networks:
       - bridge
+    depends_on:
+      - mysql
 
   meshtastic:
+    build:
+      context: .
+      dockerfile: ./docker/meshtastic/Dockerfile
     container_name: meshtastic
-    image: python:3-alpine
-    #restart: unless-stopped
+    restart: unless-stopped
     environment:
       - INTERFACE=${INTERFACE}
       - INTERFACE_PORT=${INTERFACE_PORT}
@@ -63,15 +64,12 @@ services:
       - MYSQL_HOST=${MYSQL_HOST}
       - MYSQL_PORT=${MYSQL_PORT}
       - MYSQL_TABLE=${MYSQL_TABLE}
-    depends_on:
-      - mysql
-    links:
-      - mysql
     volumes:
       - ./:/app
-    command: sh -c "apk add --update --no-cache gcc libc-dev libffi-dev && pip install -r /app/requirements.txt && python3 -u /app/main.py"
     networks:
       - bridge
+    depends_on:
+      - mysql
 
 networks:
   bridge:

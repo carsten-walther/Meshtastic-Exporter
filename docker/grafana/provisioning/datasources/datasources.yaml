@@ -1,0 +1,14 @@
+apiVersion: 1
+datasources:
+  - name: mysql
+    type: mysql
+    access: proxy
+    url: mysql:3306
+    jsonData:
+      database: meshtastic
+      sslmode: "disable"
+    user: root
+    secureJsonData:
+      password: root
+    isDefault: true
+    editable: true

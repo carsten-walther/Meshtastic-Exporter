@@ -1,20 +1,16 @@
 #!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
-import base64
 import logging
-import os
 import sys
 
-from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
-from meshtastic.protobuf.mesh_pb2 import MeshPacket, HardwareModel, Data
-from meshtastic.protobuf.portnums_pb2 import PortNum
+from meshtastic.protobuf.mesh_pb2 import HardwareModel
 from mysql.connector.pooling import MySQLConnectionPool
 
 from app.client.client_details import ClientDetails
 from app.processors.processor_registry import ProcessorRegistry
 from app.utilities.database_handler import DatabaseHandler
+from app.utilities.packet import Packet
 
 
 class MessageProcessor:
@@ -23,42 +19,16 @@ class MessageProcessor:
         self.db_handler = DatabaseHandler(db_pool)
         self.processor_registry = ProcessorRegistry()
 
-    def process(self, mesh_packet: MeshPacket):
+    def process(self, mesh_packet: Packet):
         try:
-            if getattr(mesh_packet, 'encrypted'):
-                key_bytes = base64.b64decode(os.getenv('MQTT_SERVER_KEY', '1PG7OiApB1nwvP+rz05pAQ==').encode('ascii'))
-                nonce_packet_id = getattr(mesh_packet, "id").to_bytes(8, "little")
-                nonce_from_node = getattr(mesh_packet, "from").to_bytes(8, "little")
-
-                # Put both parts into a single byte array.
-                nonce = nonce_packet_id + nonce_from_node
-
-                cipher = Cipher(algorithms.AES(key_bytes), modes.CTR(nonce), backend=default_backend())
-                decryptor = cipher.decryptor()
-                decrypted_bytes = decryptor.update(getattr(mesh_packet, "encrypted")) + decryptor.finalize()
-
-                data = Data()
-                try:
-                    data.ParseFromString(decrypted_bytes)
-                except Exception as e:
-                    logging.warning(f"Failed to decrypt message from node {getattr(mesh_packet, 'from', 'unknown')} (hex: {getattr(mesh_packet, 'from', 'unknown'):x}) with packet ID {getattr(mesh_packet, 'id', 'unknown')}: {e}")
-                    return
-                mesh_packet.decoded.CopyFrom(data)
-            port_num = int(mesh_packet.decoded.portnum)
+            port_num = mesh_packet.decoded.portnum
             payload = mesh_packet.decoded.payload
 
-            source_node_id = getattr(mesh_packet, 'from')
+            source_node_id = getattr(mesh_packet, 'nodeFrom')
             source_client_details = self._get_client_details(source_node_id)
-            if os.getenv('MESH_HIDE_SOURCE_DATA', 'false') == 'true':
-                source_client_details = ClientDetails(node_id=source_client_details.node_id, short_name='Hidden',
-                                                      long_name='Hidden')
 
-            destination_node_id = getattr(mesh_packet, 'to')
+            destination_node_id = getattr(mesh_packet, 'nodeTo')
             destination_client_details = self._get_client_details(destination_node_id)
-            if os.getenv('MESH_HIDE_DESTINATION_DATA', 'false') == 'true':
-                destination_client_details = ClientDetails(node_id=destination_client_details.node_id,
-                                                           short_name='Hidden',
-                                                           long_name='Hidden')
 
             self.process_simple_packet_details(destination_client_details, mesh_packet, port_num, source_client_details)
 
@@ -68,31 +38,23 @@ class MessageProcessor:
             logging.warning(f"Failed to process message: {e}")
             return
 
-    @staticmethod
-    def get_port_name_from_portnum(port_num):
-        descriptor = PortNum.DESCRIPTOR
-        for enum_value in descriptor.values:
-            if enum_value.number == port_num:
-                return enum_value.name
-        return 'UNKNOWN_PORT'
-
-    def process_simple_packet_details(self, destination_client_details, mesh_packet: MeshPacket, port_num,
+    def process_simple_packet_details(self, destination_client_details, mesh_packet: Packet, port_num,
                                       source_client_details):
         # Store mesh packet metrics
         self.db_handler.store_mesh_packet_metrics(
             source_client_details.node_id,
             destination_client_details.node_id,
             {
-                'portnum': self.get_port_name_from_portnum(port_num),
+                'portnum': port_num,
                 'packet_id': mesh_packet.id,
                 'channel': mesh_packet.channel,
-                'rx_time': mesh_packet.rx_time,
-                'rx_snr': mesh_packet.rx_snr,
-                'rx_rssi': mesh_packet.rx_rssi,
-                'hop_limit': mesh_packet.hop_limit,
-                'hop_start': mesh_packet.hop_start,
-                'want_ack': mesh_packet.want_ack,
-                'via_mqtt': mesh_packet.via_mqtt,
+                'rx_time': mesh_packet.rxTime.timestamp(),
+                'rx_snr': mesh_packet.rxSnr,
+                'rx_rssi': mesh_packet.rxRssi,
+                'hop_limit': mesh_packet.hopLimit,
+                'hop_start': mesh_packet.hopStart,
+                'want_ack': mesh_packet.wantAck,
+                'via_mqtt': mesh_packet.viaMqtt,
                 'message_size_bytes': sys.getsizeof(mesh_packet)
             }
         )
@@ -115,22 +77,24 @@ class MessageProcessor:
             with conn.cursor(buffered=True) as cur:
                 # First, try to select the existing record
                 cur.execute("""
-                    SELECT node_id, short_name, long_name, hardware_model, role 
-                    FROM node_details 
-                    WHERE node_id = %s;
-                """, (node_id_str,))
+                            SELECT node_id, short_name, long_name, hardware_model, role 
+                            FROM node_details 
+                            WHERE node_id = %s;
+                            """, (node_id_str,))
                 result = cur.fetchone()
 
                 if not result:
                     # If the client is not found, insert a new record
                     cur.execute("""
-                        INSERT INTO node_details (node_id, short_name, long_name, hardware_model, role) VALUES (%s, %s, %s, %s, %s);
-                    """, (node_id_str, 'Unknown', 'Unknown', HardwareModel.UNSET, None))
+                                INSERT INTO node_details (node_id, short_name, long_name, hardware_model, role) 
+                                VALUES (%s, %s, %s, %s, %s);
+                                """, (node_id_str, 'Unknown', 'Unknown', HardwareModel.UNSET, None))
                     conn.commit()
                     # Return the new record
                     cur.execute("""
-                        SELECT node_id, short_name, long_name, hardware_model, role FROM node_details WHERE node_id = %s;
-                    """, (node_id_str,))
+                                SELECT node_id, short_name, long_name, hardware_model, role FROM node_details 
+                                WHERE node_id = %s;
+                                """, (node_id_str,))
                     conn.commit()
                     result = cur.fetchone()
 
