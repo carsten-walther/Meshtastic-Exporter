@@ -2,14 +2,13 @@
 # -*- encoding: utf-8 -*-
 
 from dataclasses import dataclass
-from datetime import datetime
 from typing import Optional
 
 
 @dataclass
 class PacketDecoded:
     portnum: str
-    payload: str
+    payload: bytes
     text: str
     bitfield: Optional[int] = None
 
@@ -22,7 +21,7 @@ class Packet:
     nodeTo: str
     toId: str
     decoded: PacketDecoded
-    rxTime: datetime
+    rxTime: int
     rxSnr: float
     rxRssi: int
     viaMqtt: Optional[bool] = None

@@ -313,7 +313,7 @@ CREATE TABLE `node_details` (
   `longitude` int DEFAULT NULL,
   `latitude` int DEFAULT NULL,
   `altitude` int DEFAULT NULL,
-  `precision` int DEFAULT NULL,
+  `precision_bits` int DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -615,3 +615,24 @@ END$$
 
 DELIMITER ;
 COMMIT;
+
+
+-- LÖSUNG 1: Event Scheduler verwenden (Empfohlen)
+-- Entfernen Sie den Trigger und verwenden Sie stattdessen ein Event
+
+-- Trigger löschen
+DROP TRIGGER IF EXISTS trigger_expire_old_messages;
+
+-- Event erstellen, das jede Minute alte Nachrichten löscht
+DELIMITER $$
+CREATE EVENT IF NOT EXISTS cleanup_old_messages
+ON SCHEDULE EVERY 1 MINUTE
+ON COMPLETION PRESERVE
+ENABLE
+DO BEGIN
+    DELETE FROM messages WHERE received_at < DATE_SUB(NOW(), INTERVAL 1 MINUTE);
+END$$
+DELIMITER ;
+
+-- Event Scheduler aktivieren (falls nicht bereits aktiv)
+SET GLOBAL event_scheduler = ON;

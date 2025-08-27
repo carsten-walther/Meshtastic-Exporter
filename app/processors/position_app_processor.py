@@ -22,15 +22,14 @@ class PositionAppProcessor(Processor):
         except Exception as e:
             logging.error(f"Failed to parse POSITION_APP packet: {e}")
             return
-
         if position.latitude_i != 0 and position.longitude_i != 0:
             def db_operation(cur, conn):
                 cur.execute("""
                             UPDATE node_details
-                            SET latitude   = %s,
-                                longitude  = %s,
-                                altitude   = %s,
-                                precision  = %s,
+                            SET latitude = %s,
+                                longitude = %s,
+                                altitude = %s,
+                                precision_bits = %s,
                                 updated_at = %s
                             WHERE node_id = %s
                             """, (position.latitude_i, position.longitude_i, position.altitude, position.precision_bits,

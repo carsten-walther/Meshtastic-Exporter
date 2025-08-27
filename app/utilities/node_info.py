@@ -2,7 +2,6 @@
 # -*- encoding: utf-8 -*-
 
 from dataclasses import dataclass
-from datetime import datetime
 from typing import Optional
 
 @dataclass()
@@ -22,7 +21,7 @@ class NodeInfoPosition:
     latitudeI: Optional[int] = None
     longitudeI: Optional[int] = None
     altitude: Optional[int] = None
-    time: Optional[datetime] = None
+    time: Optional[int] = None
     locationSource: Optional[str] = None
     latitude: Optional[float] = None
     longitude: Optional[float] = None
@@ -44,5 +43,5 @@ class NodeInfo:
     position: NodeInfoPosition
     deviceMetrics: NodeInfoDeviceMetrics
     snr: Optional[float] = None
-    lastHeard: Optional[datetime] = datetime.now()
+    lastHeard: Optional[int] = None
     hopsAway: Optional[int] = None

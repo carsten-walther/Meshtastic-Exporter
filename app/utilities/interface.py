@@ -4,7 +4,7 @@
 import logging
 import os
 import time
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import Optional
 
 import meshtastic
@@ -51,15 +51,30 @@ class Interface:
                 pass
 
     @staticmethod
+    def _safe_int(value, default=0):
+        """Safely convert value to int, return default if None or invalid"""
+        if value is None:
+            return default
+        try:
+            return int(value)
+        except (ValueError, TypeError):
+            return default
+
+    @staticmethod
+    def _safe_float(value, default=0.0):
+        """Safely convert value to float, return default if None or invalid"""
+        if value is None:
+            return default
+        try:
+            return float(value)
+        except (ValueError, TypeError):
+            return default
+
+    @staticmethod
     def node_info(node_data: dict) -> Optional[NodeInfo]:
         try:
-            def safe_timestamp(timestamp):
-                if timestamp and timestamp != 0:
-                    return datetime.fromtimestamp(timestamp)
-                return None
-
             return NodeInfo(
-                num=int(node_data.get('num', 0)),
+                num=Interface._safe_int(node_data.get('num'), 0),
                 user=NodeInfoUser(
                     id=node_data.get('user', {}).get('id', 'Unknown'),
                     longName=node_data.get('user', {}).get('longName', 'Unknown'),
@@ -74,7 +89,7 @@ class Interface:
                     latitudeI=node_data.get('position', {}).get('latitudeI'),
                     longitudeI=node_data.get('position', {}).get('longitudeI'),
                     altitude=node_data.get('position', {}).get('altitude'),
-                    time=safe_timestamp(node_data.get('position', {}).get('time')),
+                    time=Interface._safe_int(node_data.get('position', {}).get('time'), int(datetime.now().timestamp())),
                     locationSource=node_data.get('position', {}).get('locationSource'),
                     latitude=node_data.get('position', {}).get('latitude'),
                     longitude=node_data.get('position', {}).get('longitude'),
@@ -87,7 +102,7 @@ class Interface:
                     uptimeSeconds=node_data.get('deviceMetrics', {}).get('uptimeSeconds'),
                 ),
                 snr=node_data.get('snr'),
-                lastHeard=safe_timestamp(node_data.get('lastHeard')),
+                lastHeard=Interface._safe_int(node_data.get('lastHeard'), int(datetime.now().timestamp())),
                 hopsAway=node_data.get('hopsAway'),
             )
 
@@ -98,36 +113,29 @@ class Interface:
     @staticmethod
     def packet(packet: dict):
         try:
-            def safe_int(value):
-                if value is not None:
-                    return int(value)
-                return None
-
-            rx_time = packet.get('rxTime')
-            if rx_time and rx_time != 0:
-                rx_time_dt = datetime.fromtimestamp(rx_time, timezone.utc)
-            else:
-                rx_time_dt = datetime.now(timezone.utc)
+            # Safely extract decoded section with defaults
+            decoded_data = packet.get('decoded', {})
 
             return Packet(
-                id=int(packet.get('id', 0)),
+                id=Interface._safe_int(packet.get('id'), 0),
                 nodeFrom=packet.get('from', 'Unknown'),
                 fromId=packet.get('fromId', 'Unknown'),
                 nodeTo=packet.get('to', 'Unknown'),
                 toId=packet.get('toId', 'Unknown'),
                 decoded=PacketDecoded(
-                    portnum=packet.get('decoded', {}).get('portnum', 'UNKNOWN_APP'),
-                    payload=packet.get('decoded', {}).get('payload', ''),
-                    text=packet.get('decoded', {}).get('text', ''),
-                    bitfield=safe_int(packet.get('decoded', {}).get('bitfield')),
+                    portnum=decoded_data.get('portnum', 'UNKNOWN_APP'),
+                    payload=decoded_data.get('payload', b''),
+                    text=decoded_data.get('text', ''),
+                    bitfield=Interface._safe_int(decoded_data.get('bitfield')),
                 ),
-                rxTime=rx_time_dt,
-                rxSnr=float(packet.get('rxSnr', 0.0)),
-                rxRssi=int(packet.get('rxRssi', 0)),
+                rxTime=Interface._safe_int(packet.get('rxTime'), int(datetime.now().timestamp())),
+                rxSnr=Interface._safe_float(packet.get('rxSnr'), 0.0),
+                rxRssi=Interface._safe_int(packet.get('rxRssi'), 0),
+                viaMqtt=packet.get('viaMqtt', False),
                 channel=packet.get('channel'),
-                wantAck=packet.get('wantAck'),
-                hopLimit=safe_int(packet.get('hopLimit')),
-                hopStart=safe_int(packet.get('hopStart')),
+                wantAck=packet.get('wantAck', False),
+                hopLimit=Interface._safe_int(packet.get('hopLimit')),
+                hopStart=Interface._safe_int(packet.get('hopStart')),
                 publicKey=packet.get('publicKey'),
                 pkiEncrypted=packet.get('pkiEncrypted'),
                 nextHop=packet.get('nextHop'),

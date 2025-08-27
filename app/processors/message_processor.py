@@ -48,7 +48,7 @@ class MessageProcessor:
                 'portnum': port_num,
                 'packet_id': mesh_packet.id,
                 'channel': mesh_packet.channel,
-                'rx_time': mesh_packet.rxTime.timestamp(),
+                'rx_time': mesh_packet.rxTime,
                 'rx_snr': mesh_packet.rxSnr,
                 'rx_rssi': mesh_packet.rxRssi,
                 'hop_limit': mesh_packet.hopLimit,
