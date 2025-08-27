@@ -43,9 +43,22 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 2,
+  "id": 5,
   "links": [],
   "panels": [
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 27,
+      "panels": [],
+      "title": "General Information",
+      "type": "row"
+    },
     {
       "datasource": {
         "default": true,
@@ -74,9 +87,9 @@
       },
       "gridPos": {
         "h": 4,
-        "w": 4,
+        "w": 5,
         "x": 0,
-        "y": 0
+        "y": 1
       },
       "id": 15,
       "options": {
@@ -107,7 +120,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT COUNT(node_id) FROM node_details WHERE node_id <> '0' LIMIT 50",
+          "rawSql": "SELECT COUNT(node_id) \nFROM node_details \nWHERE node_id <> '0';",
           "refId": "A",
           "sql": {
             "columns": [
@@ -137,7 +150,8 @@
     },
     {
       "datasource": {
-        "type": "grafana-postgresql-datasource",
+        "default": true,
+        "type": "mysql",
         "uid": "P430005175C4C7810"
       },
       "description": "Nodes that sent any packet in the last 30 minutes",
@@ -162,9 +176,9 @@
       },
       "gridPos": {
         "h": 4,
-        "w": 4,
-        "x": 4,
-        "y": 0
+        "w": 5,
+        "x": 5,
+        "y": 1
       },
       "id": 21,
       "options": {
@@ -194,7 +208,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT COUNT(*) \nFROM node_details \nWHERE updated_at  >= NOW() - INTERVAL '30 minutes';",
+          "rawSql": "SELECT COUNT(*) \nFROM node_details \nWHERE updated_at  >= NOW() - INTERVAL 30 MINUTE;",
           "refId": "A",
           "sql": {
             "columns": [
@@ -296,9 +310,9 @@
       },
       "gridPos": {
         "h": 4,
-        "w": 4,
-        "x": 8,
-        "y": 0
+        "w": 5,
+        "x": 10,
+        "y": 1
       },
       "id": 24,
       "options": {
@@ -362,190 +376,7 @@
     },
     {
       "datasource": {
-        "type": "grafana-postgresql-datasource",
-        "uid": "P430005175C4C7810"
-      },
-      "description": "Status of nodes in the MQTT server",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "fieldMinMax": false,
-          "mappings": [
-            {
-              "options": {
-                "none": {
-                  "color": "text",
-                  "index": 0,
-                  "text": "⚪️ Unknown"
-                },
-                "offline": {
-                  "color": "red",
-                  "index": 1,
-                  "text": "🛑 Offline"
-                },
-                "online": {
-                  "color": "green",
-                  "index": 2,
-                  "text": "🟢 Online"
-                }
-              },
-              "type": "value"
-            }
-          ],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 4,
-        "w": 4,
-        "x": 12,
-        "y": 0
-      },
-      "id": 17,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "center",
-        "orientation": "vertical",
-        "percentChangeColorMode": "standard",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": true
-        },
-        "showPercentChange": false,
-        "textMode": "value_and_name",
-        "wideLayout": true
-      },
-      "pluginVersion": "11.2.7",
-      "targets": [
-        {
-          "datasource": {
-            "type": "mysql",
-            "uid": "P430005175C4C7810"
-          },
-          "editorMode": "builder",
-          "format": "table",
-          "rawSql": "SELECT COUNT(mqtt_status), mqtt_status FROM node_details WHERE (COALESCE(mqtt_status, '') <> '' AND mqtt_status NOT LIKE '%none%' AND mqtt_status NOT LIKE '%Unknown%') GROUP BY mqtt_status LIMIT 50 ",
-          "refId": "A",
-          "sql": {
-            "columns": [
-              {
-                "name": "COUNT",
-                "parameters": [
-                  {
-                    "name": "mqtt_status",
-                    "type": "functionParameter"
-                  }
-                ],
-                "type": "function"
-              },
-              {
-                "parameters": [
-                  {
-                    "name": "mqtt_status",
-                    "type": "functionParameter"
-                  }
-                ],
-                "type": "function"
-              }
-            ],
-            "groupBy": [
-              {
-                "property": {
-                  "name": "mqtt_status",
-                  "type": "string"
-                },
-                "type": "groupBy"
-              }
-            ],
-            "limit": 50,
-            "whereJsonTree": {
-              "children1": [
-                {
-                  "id": "89b8baab-cdef-4012-b456-7190836a7bf2",
-                  "properties": {
-                    "field": "mqtt_status",
-                    "fieldSrc": "field",
-                    "operator": "is_not_empty",
-                    "value": [],
-                    "valueSrc": [],
-                    "valueType": []
-                  },
-                  "type": "rule"
-                },
-                {
-                  "id": "ab9a9b88-89ab-4cde-b012-3190836b4df7",
-                  "properties": {
-                    "field": "mqtt_status",
-                    "fieldSrc": "field",
-                    "operator": "not_like",
-                    "value": [
-                      "none"
-                    ],
-                    "valueError": [
-                      null
-                    ],
-                    "valueSrc": [
-                      "value"
-                    ],
-                    "valueType": [
-                      "text"
-                    ]
-                  },
-                  "type": "rule"
-                },
-                {
-                  "id": "ab89aa99-0123-4456-b89a-b191382ca762",
-                  "properties": {
-                    "field": "mqtt_status",
-                    "fieldSrc": "field",
-                    "operator": "not_like",
-                    "value": [
-                      "Unknown"
-                    ],
-                    "valueError": [
-                      null
-                    ],
-                    "valueSrc": [
-                      "value"
-                    ],
-                    "valueType": [
-                      "text"
-                    ]
-                  },
-                  "type": "rule"
-                }
-              ],
-              "id": "babb9899-0123-4456-b89a-b19079f5bfed",
-              "properties": {
-                "conjunction": "AND"
-              },
-              "type": "group"
-            },
-            "whereString": "(COALESCE(mqtt_status, '') <> '' AND mqtt_status NOT LIKE '%none%' AND mqtt_status NOT LIKE '%Unknown%')"
-          },
-          "table": "node_details"
-        }
-      ],
-      "title": "MQTT Node status",
-      "type": "stat"
-    },
-    {
-      "datasource": {
+        "default": false,
         "type": "datasource",
         "uid": "-- Mixed --"
       },
@@ -576,9 +407,9 @@
       },
       "gridPos": {
         "h": 4,
-        "w": 4,
-        "x": 16,
-        "y": 0
+        "w": 5,
+        "x": 15,
+        "y": 1
       },
       "id": 22,
       "options": {
@@ -601,19 +432,33 @@
       "pluginVersion": "11.2.7",
       "targets": [
         {
+          "dataset": "meshtastic",
           "datasource": {
-            "type": "prometheus",
-            "uid": "P1809F7CD0C75ACF3"
+            "type": "mysql",
+            "uid": "P430005175C4C7810"
           },
-          "disableTextWrap": false,
-          "editorMode": "builder",
-          "expr": "sum(sum by(portnum) (mesh_packet_source_types_total{source_id=~\"$Nodes\"}))",
-          "fullMetaSearch": false,
-          "includeNullMetadata": true,
-          "legendFormat": "__auto",
-          "range": true,
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT COUNT(*) \nFROM mesh_packet_metrics \nWHERE source_id IN ($Nodes);\n",
           "refId": "A",
-          "useBackend": false
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
         }
       ],
       "title": "Total packets sent",
@@ -621,8 +466,9 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "P1809F7CD0C75ACF3"
+        "default": true,
+        "type": "mysql",
+        "uid": "P430005175C4C7810"
       },
       "description": "Shows the total data sent on the mesh in bytes in the last hour. This includes all types of packets.",
       "fieldConfig": {
@@ -648,7 +494,7 @@
         "h": 4,
         "w": 4,
         "x": 20,
-        "y": 0
+        "y": 1
       },
       "id": 6,
       "options": {
@@ -671,38 +517,46 @@
       "pluginVersion": "11.2.7",
       "targets": [
         {
+          "dataset": "meshtastic",
           "datasource": {
-            "type": "prometheus",
+            "type": "mysql",
             "uid": "P1809F7CD0C75ACF3"
           },
           "disableTextWrap": false,
-          "editorMode": "builder",
+          "editorMode": "code",
           "expr": "sum(sum_over_time(text_message_app_size_in_bytes{source_id=~\"$Nodes\"}[1h]))",
+          "format": "table",
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": false,
           "instant": false,
           "legendFormat": "__auto",
           "range": true,
+          "rawQuery": true,
+          "rawSql": "SELECT SUM(message_size_bytes)\nFROM mesh_packet_metrics \nWHERE rx_time >= UNIX_TIMESTAMP(NOW() - INTERVAL 1 HOUR) AND source_id IN ($Nodes);",
           "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          },
           "useBackend": false
         }
       ],
       "title": "Data sent on mesh in last hour",
       "type": "stat"
-    },
-    {
-      "collapsed": false,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 4
-      },
-      "id": 25,
-      "panels": [],
-      "title": "Highlighted Nodes",
-      "type": "row"
     },
     {
       "collapsed": false,
@@ -719,15 +573,15 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "P1809F7CD0C75ACF3"
+        "default": true,
+        "type": "mysql",
+        "uid": "P430005175C4C7810"
       },
       "description": "Shows the max recorded chanel utilization and the average",
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "thresholds",
-            "seriesBy": "last"
+            "mode": "palette-classic"
           },
           "custom": {
             "axisBorderShow": false,
@@ -735,8 +589,6 @@
             "axisColorMode": "text",
             "axisLabel": "",
             "axisPlacement": "auto",
-            "axisSoftMax": 11,
-            "axisSoftMin": 3,
             "barAlignment": 0,
             "barWidthFactor": 0.6,
             "drawStyle": "line",
@@ -747,11 +599,8 @@
               "tooltip": false,
               "viz": false
             },
-            "insertNulls": 3600000,
+            "insertNulls": false,
             "lineInterpolation": "linear",
-            "lineStyle": {
-              "fill": "solid"
-            },
             "lineWidth": 1,
             "pointSize": 5,
             "scaleDistribution": {
@@ -764,7 +613,7 @@
               "mode": "none"
             },
             "thresholdsStyle": {
-              "mode": "dashed+area"
+              "mode": "off"
             }
           },
           "fieldMinMax": false,
@@ -800,36 +649,54 @@
       "id": 23,
       "options": {
         "legend": {
-          "calcs": [
-            "lastNotNull",
-            "max",
-            "mean"
-          ],
-          "displayMode": "table",
+          "calcs": [],
+          "displayMode": "list",
           "placement": "bottom",
-          "showLegend": false
+          "showLegend": true
         },
         "tooltip": {
-          "mode": "multi",
+          "mode": "single",
           "sort": "none"
         }
       },
+      "pluginVersion": "11.2.7",
       "targets": [
         {
+          "dataset": "meshtastic",
           "datasource": {
-            "type": "prometheus",
+            "type": "mysql",
             "uid": "P1809F7CD0C75ACF3"
           },
           "disableTextWrap": false,
-          "editorMode": "builder",
+          "editorMode": "code",
           "expr": "avg(telemetry_app_channel_utilization{node_id=~\"$Nodes\"})",
+          "format": "time_series",
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
           "instant": false,
           "legendFormat": "Chanel utilization (Avg)",
           "range": true,
+          "rawQuery": true,
+          "rawSql": "SELECT \n    AVG(dm.channel_utilization) OVER (PARTITION BY dm.node_id) AS \"ChUtil\",\n    dm.time\nFROM device_metrics AS dm \nJOIN node_details AS nd ON dm.node_id = nd.node_id\nWHERE dm.node_id IN ($Nodes)\n  AND dm.channel_utilization IS NOT NULL\nORDER BY dm.time;",
           "refId": "Average Chanel Utilization",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          },
           "useBackend": false
         }
       ],
@@ -838,8 +705,9 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "P1809F7CD0C75ACF3"
+        "default": true,
+        "type": "mysql",
+        "uid": "P430005175C4C7810"
       },
       "description": "This panel shows the percentage of airtime used for transmissions in the last hour. Airtime in LoRa networks represents the duration a device occupies the radio frequency channel to send data. It's a critical metric for:\n\nNetwork capacity: Higher airtime usage indicates increased network load.\n\nRegulatory compliance: Many regions limit the total airtime per device.\n\nBattery life: More airtime generally means higher power consumption.\n\nThe data comes from Meshtastic packets, reflecting actual network usage. High percentages may suggest the need for optimization or capacity planning.",
       "fieldConfig": {
@@ -944,7 +812,26 @@
           "instant": false,
           "legendFormat": "{{long_name}}",
           "range": true,
+          "rawQuery": true,
+          "rawSql": "SELECT \n    nd.long_name,\n    dm.air_util_tx AS \"AirUtilTX\",\n    dm.time\nFROM device_metrics AS dm \nJOIN node_details AS nd ON dm.node_id = nd.node_id\nWHERE dm.node_id IN ($Nodes)\n  AND dm.air_util_tx IS NOT NULL\n  AND dm.air_util_tx > -100\nORDER BY dm.time;",
           "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          },
           "useBackend": false
         }
       ],
@@ -1461,7 +1348,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "text"
+                "color": "text",
+                "value": null
               }
             ]
           }
@@ -1569,7 +1457,7 @@
           }
         ]
       },
-      "pluginVersion": "11.2.2+security-01",
+      "pluginVersion": "11.2.7",
       "targets": [
         {
           "datasource": {
@@ -1697,7 +1585,8 @@
     },
     {
       "datasource": {
-        "type": "grafana-postgresql-datasource",
+        "default": true,
+        "type": "mysql",
         "uid": "P430005175C4C7810"
       },
       "description": "Displays the nodes on the map",
@@ -1739,7 +1628,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "blue"
+                "color": "blue",
+                "value": null
               }
             ]
           },
@@ -1773,7 +1663,7 @@
         ]
       },
       "gridPos": {
-        "h": 25,
+        "h": 13,
         "w": 24,
         "x": 0,
         "y": 46
@@ -1822,7 +1712,7 @@
                 },
                 "symbolAlign": {
                   "horizontal": "center",
-                  "vertical": "top"
+                  "vertical": "center"
                 },
                 "text": {
                   "fixed": "",
@@ -1857,13 +1747,13 @@
         "view": {
           "allLayers": true,
           "id": "coords",
-          "lat": 32.008273,
-          "lon": 34.969099,
+          "lat": 51.289432,
+          "lon": 12.101178,
           "padding": 30,
-          "zoom": 8
+          "zoom": 10
         }
       },
-      "pluginVersion": "11.1.0",
+      "pluginVersion": "11.2.7",
       "targets": [
         {
           "datasource": {
@@ -1874,7 +1764,7 @@
           "format": "table",
           "hide": false,
           "rawQuery": true,
-          "rawSql": "SELECT * FROM node_details WHERE longitude != 0 AND longitude IS NOT NULL",
+          "rawSql": "SELECT * \nFROM node_details \nWHERE longitude IS NOT NULL AND longitude IS NOT NULL",
           "refId": "Nodes",
           "sql": {
             "columns": [
@@ -1929,6 +1819,8 @@
               "long_name 3": true,
               "long_name 4": true,
               "long_name 5": true,
+              "mqtt_status": false,
+              "role": false,
               "role 2": true,
               "role 3": true,
               "role 4": true,
@@ -1995,7 +1887,7 @@
       "type": "geomap"
     }
   ],
-  "refresh": "5m",
+  "refresh": "5s",
   "schemaVersion": 39,
   "tags": [],
   "templating": {
@@ -2034,6 +1926,6 @@
   "timezone": "browser",
   "title": "Main Dashboard",
   "uid": "edqkge9mf7v28g",
-  "version": 5,
+  "version": 14,
   "weekStart": "sunday"
 }
