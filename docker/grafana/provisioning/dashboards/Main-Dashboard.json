@@ -43,7 +43,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 5,
+  "id": 4,
   "links": [],
   "panels": [
     {
@@ -952,14 +952,14 @@
     },
     {
       "datasource": {
-        "type": "datasource",
-        "uid": "-- Mixed --"
+        "default": true,
+        "type": "mysql",
+        "uid": "P430005175C4C7810"
       },
       "description": "Displays types of packets in the selected time range.\n\nFor more details see:\nhttps://buf.build/meshtastic/protobufs/docs/main:meshtastic#meshtastic.PortNum",
       "fieldConfig": {
         "defaults": {
           "color": {
-            "fixedColor": "green",
             "mode": "palette-classic"
           },
           "custom": {
@@ -1005,22 +1005,36 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "11.1.0",
+      "pluginVersion": "11.2.7",
       "targets": [
         {
+          "dataset": "meshtastic",
           "datasource": {
-            "type": "prometheus",
-            "uid": "P1809F7CD0C75ACF3"
+            "type": "mysql",
+            "uid": "P430005175C4C7810"
           },
-          "disableTextWrap": false,
-          "editorMode": "builder",
-          "expr": "sum by(portnum) (mesh_packet_source_types_total{source_id=~\"$Nodes\"})",
-          "fullMetaSearch": false,
-          "includeNullMetadata": true,
-          "legendFormat": "__auto",
-          "range": true,
+          "editorMode": "code",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "SELECT \n    portnum,\n    COUNT(portnum) AS portnum_count,\n    time\nFROM mesh_packet_metrics \nWHERE time BETWEEN $__timeFrom() AND $__timeTo() AND source_id IN ($Nodes)\nGROUP BY portnum, time\nORDER BY time ASC;",
           "refId": "A",
-          "useBackend": false
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
         }
       ],
       "title": "Packet types for selected time",
@@ -1116,7 +1130,8 @@
     },
     {
       "datasource": {
-        "type": "grafana-postgresql-datasource",
+        "default": true,
+        "type": "mysql",
         "uid": "P430005175C4C7810"
       },
       "description": "Graph that is built from Neighbor Info reports and shows the signal strenth for each line",
@@ -1145,7 +1160,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT DISTINCT\n    cd.node_id AS \"id\",\n    cd.long_name AS \"title\",\n    cd.hardware_model AS \"detail__Hardware Detail\",\n    cd.role AS \"detail__Client Role\",\n    cd.mqtt_status AS \"detail__MQTT Status\",\n    cd.short_name AS \"subtitle\",\n    CASE\n        WHEN cd.mqtt_status = 'online' THEN '#2ECC71' -- Green for online\n        WHEN cd.mqtt_status = 'offline' THEN '#E74C3C' -- Red for offline\n        ELSE '#808080' -- Gray for none or any other status\n    END AS \"color\"\nFROM\n    node_details cd\nLEFT JOIN (\n    SELECT node_id FROM node_neighbors\n    UNION\n    SELECT neighbor_id FROM node_neighbors\n) nn ON cd.node_id = nn.node_id\nWHERE nn.node_id IS NOT NULL",
+          "rawSql": "SELECT DISTINCT\n    cd.node_id AS id,\n    cd.long_name AS title,\n    cd.hardware_model AS \"detail__Hardware Detail\",\n    cd.role AS \"detail__Client Role\",\n    cd.short_name AS subtitle\nFROM\n    node_details cd\nLEFT JOIN (\n    SELECT node_id FROM node_neighbors\n    UNION\n    SELECT neighbor_id FROM node_neighbors\n) nn ON cd.node_id = nn.node_id\nWHERE nn.node_id IS NOT NULL;",
           "refId": "nodes",
           "sql": {
             "columns": [
@@ -1231,7 +1246,7 @@
           "format": "table",
           "hide": false,
           "rawQuery": true,
-          "rawSql": "SELECT \n    CONCAT(neighbor_id, '_', node_id) AS id,\n    neighbor_id AS \"source\",\n    node_id AS \"target\",\n    snr AS \"mainstat\",\n    CASE\n        WHEN snr < -13 THEN '#E74C3C'  -- Red for SNR < -13\n        WHEN snr < -7 THEN '#F4D03F'   -- Yellow for -13 ≤ SNR < -7\n        ELSE '#2ECC71'                 -- Green for SNR ≥ -7\n    END AS \"color\",\n    GREATEST(0.1, LEAST(2, 1 + ((snr + 13) / 10))) AS \"thickness\"\nFROM \n    node_neighbors",
+          "rawSql": "SELECT \n    CONCAT(neighbor_id, '_', node_id) AS id,\n    neighbor_id AS source,\n    node_id AS target,\n    snr AS mainstat,\n    CASE\n        WHEN snr < -13 THEN '#E74C3C'  -- Red for SNR < -13\n        WHEN snr < -7 THEN '#F4D03F'   -- Yellow for -13 ≤ SNR < -7\n        ELSE '#2ECC71'                 -- Green for SNR ≥ -7\n    END AS \"color\",\n    GREATEST(0.1, LEAST(2, 1 + ((snr + 13) / 10))) AS \"thickness\"\nFROM \n    node_neighbors",
           "refId": "edges",
           "sql": {
             "columns": [
@@ -1293,10 +1308,11 @@
     },
     {
       "datasource": {
-        "type": "grafana-postgresql-datasource",
+        "default": true,
+        "type": "mysql",
         "uid": "P430005175C4C7810"
       },
-      "description": "Information stored on the Redis DB which includes \"hard to get\" information - that is needed to be gathered over time.",
+      "description": "Information stored in DB which includes \"hard to get\" information - that is needed to be gathered over time.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1305,7 +1321,7 @@
           "custom": {
             "align": "center",
             "cellOptions": {
-              "type": "color-text"
+              "type": "auto"
             },
             "filterable": true,
             "inspect": true
@@ -1383,42 +1399,6 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "Record Created At"
-            },
-            "properties": [
-              {
-                "id": "unit",
-                "value": "dateTimeFromNow"
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Client Role"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 126
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Last Updated At"
-            },
-            "properties": [
-              {
-                "id": "unit",
-                "value": "dateTimeFromNow"
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
               "options": "Node ID Hex"
             },
             "properties": [
@@ -1440,9 +1420,11 @@
       "options": {
         "cellHeight": "sm",
         "footer": {
-          "countRows": true,
-          "enablePagination": false,
-          "fields": [],
+          "countRows": false,
+          "enablePagination": true,
+          "fields": [
+            "Node ID Hex"
+          ],
           "reducer": [
             "count"
           ],
@@ -1467,7 +1449,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT * FROM node_details WHERE node_id <> '0' ",
+          "rawSql": "SELECT node_id, long_name, short_name, role, hardware_model \nFROM node_details \nWHERE node_id <> '0'",
           "refId": "A",
           "sql": {
             "columns": [
@@ -1663,7 +1645,7 @@
         ]
       },
       "gridPos": {
-        "h": 13,
+        "h": 21,
         "w": 24,
         "x": 0,
         "y": 46
@@ -1672,14 +1654,14 @@
       "options": {
         "basemap": {
           "config": {},
-          "name": "Layer 0",
+          "name": "Nodes",
           "opacity": 1,
           "tooltip": true,
-          "type": "xyz"
+          "type": "osm-standard"
         },
         "controls": {
-          "mouseWheelZoom": true,
-          "showAttribution": true,
+          "mouseWheelZoom": false,
+          "showAttribution": false,
           "showDebug": false,
           "showMeasure": true,
           "showScale": true,
@@ -1694,7 +1676,7 @@
                   "field": "mqtt_status",
                   "fixed": "dark-green"
                 },
-                "opacity": 1,
+                "opacity": 0.75,
                 "rotation": {
                   "fixed": 0,
                   "max": 360,
@@ -1702,7 +1684,7 @@
                   "mode": "mod"
                 },
                 "size": {
-                  "fixed": 3,
+                  "fixed": 5,
                   "max": 5,
                   "min": 1
                 },
@@ -1777,16 +1759,7 @@
                 ],
                 "type": "function"
               }
-            ],
-            "groupBy": [
-              {
-                "property": {
-                  "type": "string"
-                },
-                "type": "groupBy"
-              }
-            ],
-            "limit": 50
+            ]
           },
           "table": "node_details"
         }
@@ -1919,13 +1892,13 @@
     ]
   },
   "time": {
-    "from": "now-12h",
+    "from": "now-24h",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "browser",
   "title": "Main Dashboard",
   "uid": "edqkge9mf7v28g",
-  "version": 14,
-  "weekStart": "sunday"
+  "version": 16,
+  "weekStart": "monday"
 }
