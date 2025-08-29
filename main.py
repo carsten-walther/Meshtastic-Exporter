@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 from mysql.connector.pooling import MySQLConnectionPool
 from pubsub import pub
 
+from app.utilities.database_handler import DatabaseHandler
 from app.utilities.interface import Interface
 
 
@@ -70,6 +71,10 @@ if __name__ == '__main__':
     # Load interface and connect
     interface = Interface()
     interface.connect()
+
+    # Update database with discovered nodes from device
+    db_handler = DatabaseHandler(connection_pool)
+    db_handler.update_from_device(interface.discover_nodes())
 
 
     def on_connection_established(interface, topic=pub.AUTO_TOPIC):

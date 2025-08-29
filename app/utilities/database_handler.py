@@ -249,3 +249,49 @@ class DatabaseHandler:
                 if result:
                     return dict(zip(columns, result))
                 return {}
+
+    def update_from_device(self, nodes):
+        if not nodes:
+            return None
+
+        with self.db_pool.get_connection() as conn:
+            with conn.cursor(buffered=True) as cur:
+                for node in nodes:
+                    # Check if source_id exists in node_details, if not insert it
+                    cur.execute("SELECT 1 FROM node_details WHERE node_id = %s", (node.num,))
+
+                    longitude = 0
+                    if node.position.longitude:
+                        longitude = int(node.position.longitude / 10e-7)
+
+                    latitude = 0
+                    if node.position.latitude:
+                        latitude = int(node.position.latitude / 10e-7)
+
+                    altitude = 0
+                    if node.position.altitude:
+                        altitude = node.position.altitude
+
+                    if not cur.fetchone():
+                        # Insert unknown node for node.num
+                        cur.execute("""
+                                    INSERT INTO node_details (node_id, short_name, long_name, hardware_model, role, longitude, latitude, altitude)
+                                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                                    ON DUPLICATE KEY UPDATE node_id=node_id
+                                    """, (node.num, node.user.shortName, node.user.longName, node.user.hwModel,
+                                          node.user.role, longitude, latitude, altitude,))
+                    else:
+                        cur.execute("""
+                                    UPDATE node_details
+                                    SET short_name = %s, 
+                                        long_name = %s, 
+                                        hardware_model = %s, 
+                                        role = %s, 
+                                        longitude = %s, 
+                                        latitude = %s, 
+                                        altitude = %s,
+                                        updated_at = %s
+                                    WHERE node_id = %s
+                                    """, (node.user.shortName, node.user.longName, node.user.hwModel,
+                                          node.user.role, longitude, latitude, altitude, datetime.now().isoformat(), node.num))
+                    conn.commit()

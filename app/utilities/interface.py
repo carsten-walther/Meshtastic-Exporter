@@ -70,6 +70,20 @@ class Interface:
         except (ValueError, TypeError):
             return default
 
+    def discover_nodes(self):
+        try:
+            discovered_nodes = []
+            if self.interface and hasattr(self.interface, 'nodes'):
+                for node_id, node in self.interface.nodes.items():
+                    node_info = self.node_info(node)
+                    if node_info:
+                        discovered_nodes.append(node_info)
+            return discovered_nodes
+
+        except Exception as e:
+            logging.error(f"Error discovering nodes: {str(e)}")
+            return None
+
     @staticmethod
     def node_info(node_data: dict) -> Optional[NodeInfo]:
         try:
