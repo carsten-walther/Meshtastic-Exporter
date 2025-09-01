@@ -260,17 +260,17 @@ class DatabaseHandler:
                     # Check if source_id exists in node_details, if not insert it
                     cur.execute("SELECT 1 FROM node_details WHERE node_id = %s", (node.num,))
 
-                    longitude = 0
-                    if node.position.longitude:
-                        longitude = int(node.position.longitude / 10e-7)
+                    #longitude = 0
+                    #if node.position.longitude:
+                    #    longitude = int(node.position.longitude / 10e-7)
 
-                    latitude = 0
-                    if node.position.latitude:
-                        latitude = int(node.position.latitude / 10e-7)
+                    #latitude = 0
+                    #if node.position.latitude:
+                    #    latitude = int(node.position.latitude / 10e-7)
 
-                    altitude = 0
-                    if node.position.altitude:
-                        altitude = node.position.altitude
+                    #altitude = 0
+                    #if node.position.altitude:
+                    #    altitude = node.position.altitude
 
                     if not cur.fetchone():
                         # Insert unknown node for node.num
@@ -279,7 +279,7 @@ class DatabaseHandler:
                                     VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
                                     ON DUPLICATE KEY UPDATE node_id=node_id
                                     """, (node.num, node.user.shortName, node.user.longName, node.user.hwModel,
-                                          node.user.role, longitude, latitude, altitude,))
+                                          node.user.role, node.position.longitude, node.position.latitude, node.position.altitude,))
                     else:
                         cur.execute("""
                                     UPDATE node_details
@@ -293,5 +293,5 @@ class DatabaseHandler:
                                         updated_at = %s
                                     WHERE node_id = %s
                                     """, (node.user.shortName, node.user.longName, node.user.hwModel,
-                                          node.user.role, longitude, latitude, altitude, datetime.now().isoformat(), node.num))
+                                          node.user.role, node.position.longitude, node.position.latitude, node.position.altitude, datetime.now().isoformat(), node.num))
                     conn.commit()

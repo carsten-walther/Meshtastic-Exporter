@@ -18,16 +18,15 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 5,
+  "id": 39,
   "links": [],
   "panels": [
     {
       "datasource": {
-        "default": false,
-        "type": "datasource",
-        "uid": "-- Mixed --"
+        "type": "mysql",
+        "uid": "dewlho4ubcg74b"
       },
-      "description": "Displays nodes on the map and the number of devices around this node",
+      "description": "Zeigt Knoten auf der Karte und die Anzahl der Geräte um diesen Knoten herum an.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -47,7 +46,7 @@
             "steps": [
               {
                 "color": "green",
-                "value": null
+                "value": 0
               }
             ]
           },
@@ -66,10 +65,10 @@
         "basemap": {
           "config": {},
           "name": "Layer 0",
-          "type": "xyz"
+          "type": "osm-standard"
         },
         "controls": {
-          "mouseWheelZoom": true,
+          "mouseWheelZoom": false,
           "showAttribution": true,
           "showDebug": false,
           "showMeasure": false,
@@ -85,7 +84,7 @@
                   "field": "Total",
                   "fixed": "dark-green"
                 },
-                "opacity": 0.4,
+                "opacity": 0.6,
                 "rotation": {
                   "fixed": 0,
                   "max": 360,
@@ -93,7 +92,7 @@
                   "mode": "mod"
                 },
                 "size": {
-                  "fixed": 5,
+                  "fixed": 8,
                   "max": 100,
                   "min": 2
                 },
@@ -106,7 +105,7 @@
                   "vertical": "center"
                 },
                 "text": {
-                  "field": "long_name",
+                  "field": "Langname",
                   "fixed": "",
                   "mode": "field"
                 },
@@ -120,8 +119,8 @@
               }
             },
             "location": {
-              "latitude": "latitude_norm",
-              "longitude": "longitude_norm",
+              "latitude": "Latitude",
+              "longitude": "Longitude",
               "mode": "coords"
             },
             "name": "Layer 1",
@@ -134,25 +133,25 @@
         },
         "view": {
           "allLayers": true,
-          "id": "fit",
-          "lat": 0,
-          "lon": 0,
+          "id": "coords",
+          "lat": 51.316564,
+          "lon": 12.316329,
           "padding": 5,
-          "zoom": 18
+          "zoom": 10
         }
       },
-      "pluginVersion": "11.2.2+security-01",
+      "pluginVersion": "12.1.1",
       "targets": [
         {
+          "dataset": "meshtastic",
           "datasource": {
-            "type": "grafana-postgresql-datasource",
-            "uid": "PA942B37CCFAF5A81"
+            "type": "mysql",
+            "uid": "dewlho4ubcg74b"
           },
           "editorMode": "code",
           "format": "table",
-          "hide": false,
           "rawQuery": true,
-          "rawSql": "SELECT \n    *,\n    EXTRACT(EPOCH FROM now() - updated_at) as age_seconds\nFROM node_details \nWHERE longitude != 0 \nAND longitude IS NOT NULL\nAND node_id IN ($Nodes) ",
+          "rawSql": "SELECT\n  node_id AS \"Node ID\",\n  short_name AS \"Kurzname\",\n  long_name AS \"Langname\",\n  hardware_model AS \"Hardware\",\n  role AS \"Rolle\",\n  latitude AS \"Latitude\",\n  longitude AS \"Longitude\",\n  altitude AS \"Altitude\",\n  precision_bits AS \"Präzision\"\nFROM\n  node_details\nWHERE\n  longitude != 0\n  AND longitude != 0\n  AND node_id IN($nodeID)\nGROUP BY\n  node_id",
           "refId": "Nodes",
           "sql": {
             "columns": [
@@ -173,50 +172,72 @@
           }
         },
         {
+          "dataset": "meshtastic",
           "datasource": {
-            "type": "prometheus",
-            "uid": "P1809F7CD0C75ACF3"
+            "type": "mysql",
+            "uid": "dewlho4ubcg74b"
           },
-          "disableTextWrap": false,
-          "editorMode": "builder",
-          "exemplar": false,
-          "expr": "pax_ble{node_id=~\"$Nodes\"}",
+          "editorMode": "code",
           "format": "table",
-          "fullMetaSearch": false,
           "hide": false,
-          "includeNullMetadata": true,
-          "instant": true,
-          "legendFormat": "{{node_id}}",
-          "range": false,
+          "rawQuery": true,
+          "rawSql": "SELECT\n  ble_beacons,\n  time\nFROM\n  pax_counter_metrics\nWHERE\n  node_id IN($nodeID);\n",
           "refId": "Bluetooth",
-          "useBackend": false
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
         },
         {
+          "dataset": "meshtastic",
           "datasource": {
-            "type": "prometheus",
-            "uid": "P1809F7CD0C75ACF3"
+            "type": "mysql",
+            "uid": "dewlho4ubcg74b"
           },
-          "disableTextWrap": false,
-          "editorMode": "builder",
-          "exemplar": false,
-          "expr": "pax_wifi{node_id=~\"$Nodes\"}",
+          "editorMode": "code",
           "format": "table",
-          "fullMetaSearch": false,
           "hide": false,
-          "includeNullMetadata": true,
-          "instant": true,
-          "legendFormat": "{{node_id}}",
-          "range": false,
-          "refId": "Wifi",
-          "useBackend": false
+          "rawQuery": true,
+          "rawSql": "SELECT\n  wifi_stations,\n  time\nFROM\n  pax_counter_metrics\nWHERE\n  node_id IN($nodeID);\n",
+          "refId": "WiFi",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
         }
       ],
-      "title": "Nodes map",
+      "title": "Node Standorte",
       "transformations": [
         {
           "id": "joinByField",
           "options": {
-            "byField": "node_id",
+            "byField": "Node ID",
             "mode": "outer"
           }
         },
@@ -242,54 +263,6 @@
           "topic": "series"
         },
         {
-          "id": "filterByValue",
-          "options": {
-            "filters": [
-              {
-                "config": {
-                  "id": "isNull",
-                  "options": {}
-                },
-                "fieldName": "longitude"
-              }
-            ],
-            "match": "any",
-            "type": "exclude"
-          }
-        },
-        {
-          "id": "calculateField",
-          "options": {
-            "alias": "longitude_norm",
-            "binary": {
-              "left": "longitude",
-              "operator": "*",
-              "right": "1e-7"
-            },
-            "mode": "binary",
-            "reduce": {
-              "reducer": "sum"
-            },
-            "replaceFields": false
-          }
-        },
-        {
-          "id": "calculateField",
-          "options": {
-            "alias": "latitude_norm",
-            "binary": {
-              "left": "latitude",
-              "operator": "*",
-              "right": "1e-7"
-            },
-            "mode": "binary",
-            "reduce": {
-              "reducer": "sum"
-            },
-            "replaceFields": false
-          }
-        },
-        {
           "id": "calculateField",
           "options": {
             "mode": "reduceRow",
@@ -301,42 +274,14 @@
               "reducer": "sum"
             }
           }
-        },
-        {
-          "id": "organize",
-          "options": {
-            "excludeByName": {
-              "Time 1": true,
-              "Time 2": true,
-              "Value #Bluetooth": false,
-              "__name__ 1": true,
-              "__name__ 2": true,
-              "hardware_model 2": true,
-              "hardware_model 3": true,
-              "instance 1": true,
-              "instance 2": true,
-              "job 1": true,
-              "job 2": true,
-              "long_name 2": true,
-              "long_name 3": true,
-              "role 2": true,
-              "role 3": true,
-              "short_name 2": true,
-              "short_name 3": true
-            },
-            "includeByName": {},
-            "indexByName": {},
-            "renameByName": {}
-          }
         }
       ],
       "type": "geomap"
     },
     {
       "datasource": {
-        "default": true,
-        "type": "prometheus",
-        "uid": "P1809F7CD0C75ACF3"
+        "type": "mysql",
+        "uid": "dewlho4ubcg74b"
       },
       "fieldConfig": {
         "defaults": {
@@ -346,7 +291,7 @@
             "steps": [
               {
                 "color": "red",
-                "value": null
+                "value": 0
               },
               {
                 "color": "#EAB839",
@@ -386,23 +331,44 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "11.2.2+security-01",
+      "pluginVersion": "12.1.1",
       "targets": [
         {
+          "dataset": "meshtastic",
           "datasource": {
             "type": "prometheus",
             "uid": "P1809F7CD0C75ACF3"
           },
           "disableTextWrap": false,
-          "editorMode": "builder",
+          "editorMode": "code",
           "exemplar": false,
           "expr": "pax_uptime{node_id=~\"$Nodes\"}",
+          "format": "table",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "instant": false,
           "legendFormat": "{{long_name}}",
           "range": true,
+          "rawQuery": true,
+          "rawSql": "SELECT\n  node_id,\n  \n  -- PAX Counter Informationen\n  CASE\n    WHEN pax_counter_interval_sec > 1\n    THEN SEC_TO_TIME(pax_counter_interval_sec)\n    ELSE NULL\n  END AS pax_counter_interval,\n  DATE_FORMAT(pax_counter_last_timestamp, '%Y-%m-%d %H:%i:%s') AS pax_counter_last_timestamp,\n  \nFROM node_configurations\nWHERE\n  pax_counter_interval_sec > 1\n  AND node_id IN($nodeID)",
           "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          },
           "useBackend": false
         }
       ],
@@ -415,7 +381,7 @@
         "type": "datasource",
         "uid": "-- Dashboard --"
       },
-      "description": "Distribution of number of devices over time",
+      "description": "Verteilung der Anzahl der Geräte über die Zeit",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -442,7 +408,7 @@
             "steps": [
               {
                 "color": "green",
-                "value": null
+                "value": 0
               },
               {
                 "color": "red",
@@ -470,10 +436,12 @@
           "showLegend": false
         },
         "tooltip": {
+          "hideZeros": false,
           "mode": "single",
           "sort": "none"
         }
       },
+      "pluginVersion": "12.1.1",
       "targets": [
         {
           "datasource": {
@@ -484,7 +452,7 @@
           "refId": "A"
         }
       ],
-      "title": "Distribution of devices",
+      "title": "Verteilung der Geräte",
       "transformations": [
         {
           "id": "calculateField",
@@ -505,7 +473,7 @@
         "type": "datasource",
         "uid": "-- Dashboard --"
       },
-      "description": "Histogram for nodes and the number of devices they captured",
+      "description": "Histogramm für Knoten und die Anzahl der von ihnen erfassten Geräte",
       "fieldConfig": {
         "defaults": {
           "custom": {
@@ -568,7 +536,7 @@
           "unit": "none"
         }
       },
-      "pluginVersion": "11.2.2+security-01",
+      "pluginVersion": "12.1.1",
       "targets": [
         {
           "datasource": {
@@ -579,14 +547,13 @@
           "refId": "A"
         }
       ],
-      "title": "Histogram data of Pax counters",
+      "title": "Histogrammdaten der Pax-Zähler",
       "type": "heatmap"
     },
     {
       "datasource": {
-        "default": true,
-        "type": "prometheus",
-        "uid": "P1809F7CD0C75ACF3"
+        "type": "mysql",
+        "uid": "dewlho4ubcg74b"
       },
       "fieldConfig": {
         "defaults": {
@@ -632,7 +599,7 @@
             "steps": [
               {
                 "color": "green",
-                "value": null
+                "value": 0
               }
             ]
           },
@@ -658,10 +625,12 @@
           "showLegend": true
         },
         "tooltip": {
+          "hideZeros": false,
           "mode": "single",
           "sort": "none"
         }
       },
+      "pluginVersion": "12.1.1",
       "targets": [
         {
           "datasource": {
@@ -669,31 +638,72 @@
             "uid": "P1809F7CD0C75ACF3"
           },
           "disableTextWrap": false,
-          "editorMode": "builder",
+          "editorMode": "code",
           "expr": "pax_ble{node_id=~\"$Nodes\"}",
+          "format": "table",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "instant": false,
           "legendFormat": "{{short_name}}-{{node_id}}-Bluetooth",
           "range": true,
+          "rawQuery": true,
+          "rawSql": "SELECT\n  ble_beacons,\n  time\nFROM\n  pax_counter_metrics\nWHERE\n  node_id IN($nodeID);\n",
           "refId": "Bluetooth",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          },
           "useBackend": false
         },
         {
+          "dataset": "meshtastic",
           "datasource": {
             "type": "prometheus",
             "uid": "P1809F7CD0C75ACF3"
           },
           "disableTextWrap": false,
-          "editorMode": "builder",
+          "editorMode": "code",
           "expr": "pax_wifi{node_id=~\"$Nodes\"}",
+          "format": "table",
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
           "instant": false,
           "legendFormat": "{{short_name}}-{{node_id}}-Wifi",
           "range": true,
+          "rawQuery": true,
+          "rawSql": "SELECT\n  wifi_stations,\n  time\nFROM\n  pax_counter_metrics\nWHERE\n  node_id IN($nodeID);\n",
           "refId": "Wifi",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          },
           "useBackend": false
         }
       ],
@@ -701,36 +711,31 @@
       "type": "timeseries"
     }
   ],
+  "preload": false,
   "refresh": "10s",
-  "schemaVersion": 39,
+  "schemaVersion": 41,
   "tags": [],
   "templating": {
     "list": [
       {
         "current": {
-          "selected": true,
-          "text": [
-            "All"
-          ],
-          "value": [
-            "$__all"
-          ]
+          "text": "All",
+          "value": "$__all"
         },
         "datasource": {
-          "type": "grafana-postgresql-datasource",
-          "uid": "PA942B37CCFAF5A81"
+          "type": "mysql",
+          "uid": "dewlho4ubcg74b"
         },
-        "definition": "SELECT \n  concat(long_name, ' (', node_id, ')') as __text, \n  node_id as __value \nFROM node_details \nORDER BY long_name",
-        "hide": 0,
+        "definition": "SELECT \n  CONCAT(long_name, \" \", \"(\", node_id, \")\") AS __text, \n  node_id as __value\nFROM node_details \nORDER BY long_name ASC;",
+        "description": "",
         "includeAll": true,
+        "label": "Node ID",
         "multi": true,
-        "name": "Nodes",
+        "name": "nodeID",
         "options": [],
-        "query": "SELECT \n  concat(long_name, ' (', node_id, ')') as __text, \n  node_id as __value \nFROM node_details \nORDER BY long_name",
+        "query": "SELECT \n  CONCAT(long_name, \" \", \"(\", node_id, \")\") AS __text, \n  node_id as __value\nFROM node_details \nORDER BY long_name ASC;",
         "refresh": 1,
         "regex": "",
-        "skipUrlSync": false,
-        "sort": 0,
         "type": "query"
       }
     ]
@@ -740,9 +745,9 @@
     "to": "now"
   },
   "timepicker": {},
-  "timezone": "browser",
+  "timezone": "",
   "title": "PAX Dashboard",
   "uid": "feeyg8v9n8d8gf",
-  "version": 35,
-  "weekStart": ""
+  "version": 14,
+  "weekStart": "monday"
 }

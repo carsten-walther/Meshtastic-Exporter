@@ -53,6 +53,7 @@ services:
       dockerfile: ./docker/meshtastic/Dockerfile
     container_name: meshtastic
     restart: unless-stopped
+    privileged: true
     environment:
       - INTERFACE=${INTERFACE}
       - INTERFACE_PORT=${INTERFACE_PORT}
@@ -68,8 +69,8 @@ services:
       - ./:/app
     networks:
       - bridge
-    depends_on:
-      - mysql
+    devices:
+      - /dev/ttyUSB0:/dev/ttyUSB0
 
 networks:
   bridge:

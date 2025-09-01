@@ -32,7 +32,7 @@ class PositionAppProcessor(Processor):
                                 precision_bits = %s,
                                 updated_at = %s
                             WHERE node_id = %s
-                            """, (position.latitude_i, position.longitude_i, position.altitude, position.precision_bits,
+                            """, (position.latitude_i * 1e-7, position.longitude_i * 1e-7, position.altitude, position.precision_bits,
                                   datetime.now().isoformat(), client_details.node_id))
                 conn.commit()
 

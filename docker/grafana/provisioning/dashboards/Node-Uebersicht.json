@@ -18,7 +18,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 10,
+  "id": 36,
   "links": [],
   "panels": [
     {
@@ -26,7 +26,7 @@
         "type": "datasource",
         "uid": "-- Mixed --"
       },
-      "description": "Total packets sent in the specified time range",
+      "description": "Zeigt die kumulative Gesamtzahl der in einem bestimmten Zeitraum gesendeten Pakete.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -39,20 +39,15 @@
             "steps": [
               {
                 "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
+                "value": 0
               }
             ]
-          },
-          "unit": "Packets"
+          }
         },
         "overrides": []
       },
       "gridPos": {
-        "h": 4,
+        "h": 5,
         "w": 5,
         "x": 0,
         "y": 0
@@ -60,14 +55,12 @@
       "id": 10,
       "options": {
         "colorMode": "value",
-        "graphMode": "none",
+        "graphMode": "area",
         "justifyMode": "auto",
         "orientation": "auto",
         "percentChangeColorMode": "standard",
         "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
+          "calcs": [],
           "fields": "",
           "values": false
         },
@@ -75,104 +68,136 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "11.2.2+security-01",
+      "pluginVersion": "12.1.1",
       "targets": [
         {
+          "dataset": "meshtastic",
           "datasource": {
-            "type": "prometheus",
-            "uid": "P1809F7CD0C75ACF3"
+            "type": "mysql",
+            "uid": "dewlho4ubcg74b"
           },
-          "disableTextWrap": false,
-          "editorMode": "builder",
-          "expr": "sum(sum by(portnum) (mesh_packet_source_types_total{source_id=~\"$nodeID\"}))",
-          "fullMetaSearch": false,
-          "includeNullMetadata": true,
-          "legendFormat": "__auto",
-          "range": true,
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  time,\n  COUNT(*) OVER (\n    ORDER BY\n      time\n  )\nFROM\n  mesh_packet_metrics\nWHERE\n  $__timeFilter(time)\n  AND message_size_bytes IS NOT NULL\n  AND source_id IN ($nodeID)\nGROUP BY\n  time\nORDER BY\n  time;",
           "refId": "A",
-          "useBackend": false
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
         }
       ],
-      "title": "Total packets sent",
+      "title": "Pakete gesendet",
       "type": "stat"
     },
     {
       "datasource": {
-        "type": "datasource",
-        "uid": "-- Mixed --"
+        "type": "mysql",
+        "uid": "dewlho4ubcg74b"
       },
-      "description": "Displays types of packets sent in the selected time range.\n\nFor more details see:\nhttps://buf.build/meshtastic/protobufs/docs/main:meshtastic#meshtastic.PortNum",
+      "description": "Zeigt die Arten von Paketen im ausgewählten Zeitbereich an.\nFor more details see:\nhttps://buf.build/meshtastic/protobufs/docs/main:meshtastic#meshtastic.PortNum",
       "fieldConfig": {
         "defaults": {
           "color": {
             "mode": "thresholds"
           },
-          "fieldMinMax": false,
+          "custom": {
+            "align": "center",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
                 "color": "green",
-                "value": null
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
               }
             ]
-          },
-          "unit": "Packets"
+          }
         },
         "overrides": []
       },
       "gridPos": {
-        "h": 4,
+        "h": 5,
         "w": 14,
         "x": 5,
         "y": 0
       },
-      "id": 11,
+      "id": 5,
       "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "center",
-        "orientation": "auto",
-        "percentChangeColorMode": "standard",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
           "fields": "",
-          "values": false
+          "reducer": [
+            "sum"
+          ],
+          "show": false
         },
-        "showPercentChange": false,
-        "textMode": "value_and_name",
-        "wideLayout": true
+        "showHeader": false
       },
-      "pluginVersion": "11.2.2+security-01",
+      "pluginVersion": "12.1.1",
       "targets": [
         {
+          "dataset": "meshtastic",
           "datasource": {
-            "type": "prometheus",
-            "uid": "P1809F7CD0C75ACF3"
+            "type": "mysql",
+            "uid": "PE08F4C9C36148019"
           },
-          "disableTextWrap": false,
-          "editorMode": "builder",
-          "expr": "sum by(portnum) (mesh_packet_source_types_total{source_id=~\"$nodeID\"})",
-          "fullMetaSearch": false,
-          "includeNullMetadata": true,
-          "legendFormat": "__auto",
-          "range": true,
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  portnum,\n  COUNT(*) as count\nFROM\n  mesh_packet_metrics\nWHERE\n  $__timeFilter(time)\n  AND source_id IN ($nodeID)\nGROUP BY\n  portnum\nORDER BY\n  time DESC;",
           "refId": "A",
-          "useBackend": false
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
         }
       ],
-      "title": "Packet types sent for selected time",
-      "type": "stat"
+      "title": "Pakettypen gesendet",
+      "type": "table"
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "P1809F7CD0C75ACF3"
+        "type": "mysql",
+        "uid": "dewlho4ubcg74b"
       },
-      "description": "The last time a packet was observed being sent from this node",
+      "description": "Das letzte Mal, als ein Paket von diesem Knoten gesendet wurde",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -185,7 +210,7 @@
             "steps": [
               {
                 "color": "green",
-                "value": null
+                "value": 0
               }
             ]
           },
@@ -194,7 +219,7 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 4,
+        "h": 5,
         "w": 5,
         "x": 19,
         "y": 0
@@ -207,17 +232,15 @@
         "orientation": "auto",
         "percentChangeColorMode": "standard",
         "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "/^Time$/",
+          "calcs": [],
+          "fields": "/^time$/",
           "values": false
         },
         "showPercentChange": false,
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "11.2.2+security-01",
+      "pluginVersion": "12.1.1",
       "targets": [
         {
           "datasource": {
@@ -226,13 +249,33 @@
           },
           "editorMode": "code",
           "expr": "timestamp((\n  count(mesh_packet_total{source_id=\"$nodeID\"}) by (source_id)\n  -\n  count(mesh_packet_total{source_id=\"$nodeID\"} offset 1m) by (source_id)\n) > 0)",
+          "format": "table",
           "instant": false,
           "legendFormat": "__auto",
           "range": true,
-          "refId": "A"
+          "rawQuery": true,
+          "rawSql": "SELECT\n  *\nFROM\n  mesh_packet_metrics\nWHERE\n  $__timeFilter(time)\n  AND source_id IN ($nodeID)\nORDER BY\n  time DESC;",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
         }
       ],
-      "title": "Last packet sent",
+      "title": "Letztes Paket gesendet",
       "type": "stat"
     },
     {
@@ -240,7 +283,7 @@
         "type": "datasource",
         "uid": "-- Mixed --"
       },
-      "description": "Total packets observed with this node as their destination in the specified time range",
+      "description": "Zeigt die kumulative Gesamtzahl der in einem bestimmten Zeitraum empfangenen Pakete.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -253,35 +296,28 @@
             "steps": [
               {
                 "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
+                "value": 0
               }
             ]
-          },
-          "unit": "Packets"
+          }
         },
         "overrides": []
       },
       "gridPos": {
-        "h": 4,
+        "h": 5,
         "w": 5,
         "x": 0,
-        "y": 4
+        "y": 5
       },
-      "id": 14,
+      "id": 21,
       "options": {
         "colorMode": "value",
-        "graphMode": "none",
+        "graphMode": "area",
         "justifyMode": "auto",
         "orientation": "auto",
         "percentChangeColorMode": "standard",
         "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
+          "calcs": [],
           "fields": "",
           "values": false
         },
@@ -289,104 +325,136 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "11.2.2+security-01",
+      "pluginVersion": "12.1.1",
       "targets": [
         {
+          "dataset": "meshtastic",
           "datasource": {
-            "type": "prometheus",
-            "uid": "P1809F7CD0C75ACF3"
+            "type": "mysql",
+            "uid": "dewlho4ubcg74b"
           },
-          "disableTextWrap": false,
-          "editorMode": "builder",
-          "expr": "sum(sum by(portnum) (mesh_packet_source_types_total{destination_id=~\"$nodeID\"}))",
-          "fullMetaSearch": false,
-          "includeNullMetadata": true,
-          "legendFormat": "__auto",
-          "range": true,
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  time,\n  COUNT(*) OVER (\n    ORDER BY\n      time\n  )\nFROM\n  mesh_packet_metrics\nWHERE\n  $__timeFilter(time)\n  AND message_size_bytes IS NOT NULL\n  AND destination_id IN ($nodeID)\nGROUP BY\n  time\nORDER BY\n  time;",
           "refId": "A",
-          "useBackend": false
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
         }
       ],
-      "title": "Total packets received",
+      "title": "Pakete empfangen",
       "type": "stat"
     },
     {
       "datasource": {
-        "type": "datasource",
-        "uid": "-- Mixed --"
+        "type": "mysql",
+        "uid": "dewlho4ubcg74b"
       },
-      "description": "Displays types of packets received in the selected time range.\n\nFor more details see:\nhttps://buf.build/meshtastic/protobufs/docs/main:meshtastic#meshtastic.PortNum",
+      "description": "Zeigt die Arten von Paketen im ausgewählten Zeitbereich an.\nFor more details see:\nhttps://buf.build/meshtastic/protobufs/docs/main:meshtastic#meshtastic.PortNum",
       "fieldConfig": {
         "defaults": {
           "color": {
             "mode": "thresholds"
           },
-          "fieldMinMax": false,
+          "custom": {
+            "align": "center",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
                 "color": "green",
-                "value": null
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
               }
             ]
-          },
-          "unit": "Packets"
+          }
         },
         "overrides": []
       },
       "gridPos": {
-        "h": 4,
+        "h": 5,
         "w": 14,
         "x": 5,
-        "y": 4
+        "y": 5
       },
-      "id": 15,
+      "id": 23,
       "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "center",
-        "orientation": "auto",
-        "percentChangeColorMode": "standard",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
           "fields": "",
-          "values": false
+          "reducer": [
+            "sum"
+          ],
+          "show": false
         },
-        "showPercentChange": false,
-        "textMode": "value_and_name",
-        "wideLayout": true
+        "showHeader": false
       },
-      "pluginVersion": "11.2.2+security-01",
+      "pluginVersion": "12.1.1",
       "targets": [
         {
+          "dataset": "meshtastic",
           "datasource": {
-            "type": "prometheus",
-            "uid": "P1809F7CD0C75ACF3"
+            "type": "mysql",
+            "uid": "PE08F4C9C36148019"
           },
-          "disableTextWrap": false,
-          "editorMode": "builder",
-          "expr": "sum by(portnum) (mesh_packet_source_types_total{destination_id=\"$nodeID\"})",
-          "fullMetaSearch": false,
-          "includeNullMetadata": true,
-          "legendFormat": "__auto",
-          "range": true,
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  portnum,\n  COUNT(*) as count\nFROM\n  mesh_packet_metrics\nWHERE\n  $__timeFilter(time)\n  AND destination_id IN ($nodeID)\nGROUP BY\n  portnum\nORDER BY\n  time DESC;",
           "refId": "A",
-          "useBackend": false
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
         }
       ],
-      "title": "Packet types received for selected time",
-      "type": "stat"
+      "title": "Pakettypen empfangen",
+      "type": "table"
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "P1809F7CD0C75ACF3"
+        "type": "mysql",
+        "uid": "dewlho4ubcg74b"
       },
-      "description": "The last time a packet was observed with this node as its destination",
+      "description": "Das letzte Mal, als ein Paket von diesem Knoten empfangen wurde.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -399,7 +467,7 @@
             "steps": [
               {
                 "color": "green",
-                "value": null
+                "value": 0
               }
             ]
           },
@@ -408,12 +476,12 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 4,
+        "h": 5,
         "w": 5,
         "x": 19,
-        "y": 4
+        "y": 5
       },
-      "id": 16,
+      "id": 22,
       "options": {
         "colorMode": "value",
         "graphMode": "area",
@@ -421,17 +489,15 @@
         "orientation": "auto",
         "percentChangeColorMode": "standard",
         "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "/^Time$/",
+          "calcs": [],
+          "fields": "/^time$/",
           "values": false
         },
         "showPercentChange": false,
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "11.2.2+security-01",
+      "pluginVersion": "12.1.1",
       "targets": [
         {
           "datasource": {
@@ -439,20 +505,40 @@
             "uid": "P1809F7CD0C75ACF3"
           },
           "editorMode": "code",
-          "expr": "timestamp((\n  count(mesh_packet_total{destination_id=\"$nodeID\"}) by (destination_id)\n  -\n  count(mesh_packet_total{destination_id=\"$nodeID\"} offset 1m) by (destination_id)\n) > 0)",
+          "expr": "timestamp((\n  count(mesh_packet_total{source_id=\"$nodeID\"}) by (source_id)\n  -\n  count(mesh_packet_total{source_id=\"$nodeID\"} offset 1m) by (source_id)\n) > 0)",
+          "format": "table",
           "instant": false,
           "legendFormat": "__auto",
           "range": true,
-          "refId": "A"
+          "rawQuery": true,
+          "rawSql": "SELECT\n  *\nFROM\n  mesh_packet_metrics\nWHERE\n  $__timeFilter(time)\n  AND destination_id IN ($nodeID)\nORDER BY\n  time DESC;",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
         }
       ],
-      "title": "Last message received",
+      "title": "Letztes Paket empfangen",
       "type": "stat"
     },
     {
       "datasource": {
-        "type": "grafana-postgresql-datasource",
-        "uid": "PA942B37CCFAF5A81"
+        "type": "mysql",
+        "uid": "dewlho4ubcg74b"
       },
       "fieldConfig": {
         "defaults": {
@@ -494,7 +580,7 @@
             "steps": [
               {
                 "color": "green",
-                "value": null
+                "value": 0
               }
             ]
           }
@@ -542,7 +628,7 @@
         "h": 4,
         "w": 24,
         "x": 0,
-        "y": 8
+        "y": 10
       },
       "id": 1,
       "options": {
@@ -557,17 +643,17 @@
         },
         "showHeader": true
       },
-      "pluginVersion": "11.2.2+security-01",
+      "pluginVersion": "12.1.1",
       "targets": [
         {
           "datasource": {
-            "type": "mysql",
+            "type": "postgres",
             "uid": "PA942B37CCFAF5A81"
           },
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT * FROM node_details WHERE node_id = '${nodeID}' LIMIT 1 ",
+          "rawSql": "SELECT\n  *\nFROM\n  node_details\nWHERE\n  node_id = '$nodeID'\nLIMIT\n  1",
           "refId": "A",
           "sql": {
             "columns": [
@@ -619,16 +705,18 @@
           "table": "node_details"
         }
       ],
-      "title": "Node details",
+      "title": "Nodedetails",
       "transformations": [
         {
           "id": "organize",
           "options": {
             "excludeByName": {
               "altitude": true,
+              "created_at": true,
               "latitude": true,
               "longitude": true,
-              "precision": true
+              "precision": true,
+              "precision_bits": true
             },
             "includeByName": {},
             "indexByName": {},
@@ -645,41 +733,46 @@
           }
         }
       ],
-      "transparent": true,
       "type": "table"
     },
     {
       "datasource": {
         "type": "mysql",
-        "uid": "PA942B37CCFAF5A81"
+        "uid": "dewlho4ubcg74b"
       },
-      "description": "Graph that is built from Neighbor Info reports and shows the signal strenth for each line",
+      "description": "Grafik, die aus Nachbarschaftsinformationsberichten erstellt wurde und die Signalstärke für jede Leitung anzeigt.",
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
       "gridPos": {
-        "h": 8,
+        "h": 7,
         "w": 8,
         "x": 0,
-        "y": 12
+        "y": 14
       },
       "id": 9,
       "options": {
         "edges": {
           "mainStatUnit": "dB"
         },
+        "layoutAlgorithm": "layered",
         "nodes": {
           "arcs": []
-        }
+        },
+        "zoomMode": "cooperative"
       },
-      "pluginVersion": "10.4.2",
+      "pluginVersion": "12.1.1",
       "targets": [
         {
           "datasource": {
-            "type": "mysql",
+            "type": "postgres",
             "uid": "PA942B37CCFAF5A81"
           },
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT \n    node_id AS \"id\", \n    long_name AS \"title\", \n    hardware_model AS \"detail__Hardware Detail\", \n    role AS \"detail__Client Role\", \n    mqtt_status AS \"detail__MQTT Status\", \n    short_name AS \"subtitle\",\n    CASE \n        WHEN mqtt_status = 'online' THEN '#2ECC71'  -- Green for online\n        WHEN mqtt_status = 'offline' THEN '#E74C3C' -- Red for offline\n        ELSE '#808080'                              -- Gray for none or any other status\n    END AS \"color\"\nFROM \n    node_details\n    WHERE node_id IN (${nodeID:singlequote}) OR node_id IN (${relatives:singlequote})",
+          "rawSql": "SELECT\n  node_id AS \"id\",\n  long_name AS \"title\",\n  short_name AS \"subtitle\",\n  hardware_model AS \"Hardware\",\n  role AS \"Rolle\",\n  \"#808080\" AS color\nFROM\n  node_details\nWHERE\n  node_id = \"$nodeID\"\n  OR node_id = \"$relatives\"",
           "refId": "nodes",
           "sql": {
             "columns": [
@@ -758,7 +851,7 @@
         },
         {
           "datasource": {
-            "type": "mysql",
+            "type": "postgres",
             "uid": "PA942B37CCFAF5A81"
           },
           "editorMode": "code",
@@ -827,24 +920,46 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "P1809F7CD0C75ACF3"
+        "type": "mysql",
+        "uid": "dewlho4ubcg74b"
       },
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "continuous-GrYlRd"
+            "mode": "palette-classic"
           },
           "custom": {
-            "fillOpacity": 70,
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
             "hideFrom": {
               "legend": false,
               "tooltip": false,
               "viz": false
             },
             "insertNulls": false,
-            "lineWidth": 0,
-            "spanNulls": false
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
           },
           "mappings": [],
           "thresholds": {
@@ -852,7 +967,7 @@
             "steps": [
               {
                 "color": "green",
-                "value": null
+                "value": 0
               }
             ]
           },
@@ -864,67 +979,70 @@
         "h": 5,
         "w": 9,
         "x": 8,
-        "y": 12
+        "y": 14
       },
-      "id": 5,
+      "id": 20,
       "options": {
-        "alignValue": "center",
         "legend": {
+          "calcs": [],
           "displayMode": "list",
           "placement": "bottom",
-          "showLegend": false
+          "showLegend": true
         },
-        "mergeValues": true,
-        "rowHeight": 0.9,
-        "showValue": "auto",
         "tooltip": {
+          "hideZeros": false,
           "mode": "single",
           "sort": "none"
         }
       },
+      "pluginVersion": "12.1.1",
       "targets": [
         {
+          "dataset": "meshtastic",
           "datasource": {
             "type": "prometheus",
             "uid": "P1809F7CD0C75ACF3"
           },
           "disableTextWrap": false,
-          "editorMode": "builder",
+          "editorMode": "code",
           "exemplar": false,
           "expr": "topk(1, telemetry_app_temperature{node_id=\"$nodeID\"})",
+          "format": "table",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "instant": false,
           "legendFormat": "{{long_name}}",
           "range": true,
+          "rawQuery": true,
+          "rawSql": "SELECT\n  temperature,\n  time\nFROM\n  environment_metrics\nWHERE\n  node_id = $nodeID\n  AND temperature IS NOT NULL\n  AND $__timeFilter(time)\nORDER BY\n  time;",
           "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          },
           "useBackend": false
         }
       ],
-      "title": "Temprerature telemetry",
-      "transformations": [
-        {
-          "id": "seriesToRows",
-          "options": {}
-        },
-        {
-          "id": "organize",
-          "options": {
-            "excludeByName": {
-              "Metric": true
-            },
-            "includeByName": {},
-            "indexByName": {},
-            "renameByName": {}
-          }
-        }
-      ],
-      "type": "state-timeline"
+      "title": "Temperatur",
+      "type": "timeseries"
     },
     {
       "datasource": {
-        "type": "grafana-postgresql-datasource",
-        "uid": "PA942B37CCFAF5A81"
+        "type": "mysql",
+        "uid": "dewlho4ubcg74b"
       },
       "fieldConfig": {
         "defaults": {
@@ -932,12 +1050,11 @@
             "mode": "thresholds"
           },
           "custom": {
-            "align": "left",
+            "align": "auto",
             "cellOptions": {
-              "type": "auto",
-              "wrapText": false
+              "type": "auto"
             },
-            "filterable": true,
+            "filterable": false,
             "inspect": false
           },
           "fieldMinMax": false,
@@ -947,7 +1064,7 @@
             "steps": [
               {
                 "color": "green",
-                "value": null
+                "value": 0
               }
             ]
           }
@@ -958,22 +1075,23 @@
         "h": 15,
         "w": 7,
         "x": 17,
-        "y": 12
+        "y": 14
       },
       "id": 17,
       "options": {
         "cellHeight": "sm",
         "footer": {
           "countRows": false,
+          "enablePagination": false,
           "fields": "",
           "reducer": [
             "sum"
           ],
           "show": false
         },
-        "showHeader": true
+        "showHeader": false
       },
-      "pluginVersion": "11.2.2+security-01",
+      "pluginVersion": "12.1.1",
       "targets": [
         {
           "datasource": {
@@ -983,7 +1101,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT\n  node_id,\n  CASE\n    WHEN EXTRACT(EPOCH FROM environment_update_interval) > 1\n    THEN to_char(environment_update_interval, 'HH24:MI:SS')\n    ELSE NULL\n  END AS environment_update_interval,\n  to_char(environment_update_last_timestamp, 'YYYY-MM-DD HH24:MI:SS') AS environment_update_last_timestamp,\n  \n  CASE\n    WHEN EXTRACT(EPOCH FROM device_update_interval) > 1\n    THEN to_char(device_update_interval, 'HH24:MI:SS')\n    ELSE NULL\n  END AS device_update_interval,\n  to_char(device_update_last_timestamp, 'YYYY-MM-DD HH24:MI:SS') AS device_update_last_timestamp,\n  \n  CASE\n    WHEN EXTRACT(EPOCH FROM air_quality_update_interval) > 1\n    THEN to_char(air_quality_update_interval, 'HH24:MI:SS')\n    ELSE NULL\n  END AS air_quality_update_interval,\n  to_char(air_quality_update_last_timestamp, 'YYYY-MM-DD HH24:MI:SS') AS air_quality_update_last_timestamp,\n  \n  CASE\n    WHEN EXTRACT(EPOCH FROM power_update_interval) > 1\n    THEN to_char(power_update_interval, 'HH24:MI:SS')\n    ELSE NULL\n  END AS power_update_interval,\n  to_char(power_update_last_timestamp, 'YYYY-MM-DD HH24:MI:SS') AS power_update_last_timestamp,\n  \n  CASE\n    WHEN EXTRACT(EPOCH FROM range_test_interval) > 1\n    THEN to_char(range_test_interval, 'HH24:MI:SS')\n    ELSE NULL\n  END AS range_test_interval,\n  to_char(range_test_last_packet_timestamp, 'YYYY-MM-DD HH24:MI:SS') AS range_test_last_packet_timestamp,\n  \n  CASE\n    WHEN EXTRACT(EPOCH FROM pax_counter_interval) > 1\n    THEN to_char(pax_counter_interval, 'HH24:MI:SS')\n    ELSE NULL\n  END AS pax_counter_interval,\n  to_char(pax_counter_last_timestamp, 'YYYY-MM-DD HH24:MI:SS') AS pax_counter_last_timestamp,\n  \n  CASE\n    WHEN EXTRACT(EPOCH FROM neighbor_info_interval) > 1\n    THEN to_char(neighbor_info_interval, 'HH24:MI:SS')\n    ELSE NULL\n  END AS neighbor_info_interval,\n  to_char(neighbor_info_last_timestamp, 'YYYY-MM-DD HH24:MI:SS') AS neighbor_info_last_timestamp,\n  \n  CASE\n    WHEN EXTRACT(EPOCH FROM map_broadcast_interval) > 1\n    THEN to_char(map_broadcast_interval, 'HH24:MI:SS')\n    ELSE NULL\n  END AS map_broadcast_interval,\n  to_char(map_broadcast_last_timestamp, 'YYYY-MM-DD HH24:MI:SS') AS map_broadcast_last_timestamp,\n  \n  mqtt_encryption_enabled,\n  mqtt_json_enabled,\n  mqtt_configured_root_topic,\n  to_char(mqtt_info_last_timestamp, 'YYYY-MM-DD HH24:MI:SS') AS mqtt_info_last_timestamp,\n  \n  to_char(last_updated, 'YYYY-MM-DD HH24:MI:SS') AS last_updated\nFROM node_configurations\nWHERE\n  (EXTRACT(EPOCH FROM environment_update_interval) > 1 OR\n   EXTRACT(EPOCH FROM device_update_interval) > 1 OR\n   EXTRACT(EPOCH FROM air_quality_update_interval) > 1 OR\n   EXTRACT(EPOCH FROM power_update_interval) > 1 OR\n   EXTRACT(EPOCH FROM range_test_interval) > 1 OR\n   EXTRACT(EPOCH FROM pax_counter_interval) > 1 OR\n   EXTRACT(EPOCH FROM neighbor_info_interval) > 1 OR\n   EXTRACT(EPOCH FROM map_broadcast_interval) > 1)\n  AND node_id = '${nodeID}'\nLIMIT 50",
+          "rawSql": "SELECT\n  node_id,\n  \n  -- Environment Update Informationen\n  CASE\n    WHEN environment_update_interval_sec > 1\n    THEN SEC_TO_TIME(environment_update_interval_sec)\n    ELSE NULL\n  END AS environment_update_interval,\n  DATE_FORMAT(environment_update_last_timestamp, '%Y-%m-%d %H:%i:%s') AS environment_update_last_timestamp,\n  \n  -- Device Update Informationen  \n  CASE\n    WHEN device_update_interval_sec > 1\n    THEN SEC_TO_TIME(device_update_interval_sec)\n    ELSE NULL\n  END AS device_update_interval,\n  DATE_FORMAT(device_update_last_timestamp, '%Y-%m-%d %H:%i:%s') AS device_update_last_timestamp,\n  \n  -- Air Quality Update Informationen\n  CASE\n    WHEN air_quality_update_interval_sec > 1\n    THEN SEC_TO_TIME(air_quality_update_interval_sec)\n    ELSE NULL\n  END AS air_quality_update_interval,\n  DATE_FORMAT(air_quality_update_last_timestamp, '%Y-%m-%d %H:%i:%s') AS air_quality_update_last_timestamp,\n  \n  -- Power Update Informationen\n  CASE\n    WHEN power_update_interval_sec > 1\n    THEN SEC_TO_TIME(power_update_interval_sec)\n    ELSE NULL\n  END AS power_update_interval,\n  DATE_FORMAT(power_update_last_timestamp, '%Y-%m-%d %H:%i:%s') AS power_update_last_timestamp,\n  \n  -- Range Test Informationen\n  CASE\n    WHEN range_test_interval_sec > 1\n    THEN SEC_TO_TIME(range_test_interval_sec)\n    ELSE NULL\n  END AS range_test_interval,\n  DATE_FORMAT(range_test_last_packet_timestamp, '%Y-%m-%d %H:%i:%s') AS range_test_last_packet_timestamp,\n  \n  -- PAX Counter Informationen\n  CASE\n    WHEN pax_counter_interval_sec > 1\n    THEN SEC_TO_TIME(pax_counter_interval_sec)\n    ELSE NULL\n  END AS pax_counter_interval,\n  DATE_FORMAT(pax_counter_last_timestamp, '%Y-%m-%d %H:%i:%s') AS pax_counter_last_timestamp,\n  \n  -- Neighbor Info Informationen\n  CASE\n    WHEN neighbor_info_interval_sec > 1\n    THEN SEC_TO_TIME(neighbor_info_interval_sec)\n    ELSE NULL\n  END AS neighbor_info_interval,\n  DATE_FORMAT(neighbor_info_last_timestamp, '%Y-%m-%d %H:%i:%s') AS neighbor_info_last_timestamp,\n  \n  -- Map Broadcast Informationen\n  CASE\n    WHEN map_broadcast_interval_sec > 1\n    THEN SEC_TO_TIME(map_broadcast_interval_sec)\n    ELSE NULL\n  END AS map_broadcast_interval,\n  DATE_FORMAT(map_broadcast_last_timestamp, '%Y-%m-%d %H:%i:%s') AS map_broadcast_last_timestamp,\n  \n  -- MQTT Informationen\n  mqtt_encryption_enabled,\n  mqtt_json_enabled,\n  mqtt_configured_root_topic,\n  DATE_FORMAT(mqtt_info_last_timestamp, '%Y-%m-%d %H:%i:%s') AS mqtt_info_last_timestamp,\n  \n  -- Letzte Aktualisierung\n  DATE_FORMAT(last_updated, '%Y-%m-%d %H:%i:%s') AS last_updated\n  \nFROM node_configurations\nWHERE\n  (environment_update_interval_sec > 1 OR\n   device_update_interval_sec > 1 OR\n   air_quality_update_interval_sec > 1 OR\n   power_update_interval_sec > 1 OR\n   range_test_interval_sec > 1 OR\n   pax_counter_interval_sec > 1 OR\n   neighbor_info_interval_sec > 1 OR\n   map_broadcast_interval_sec > 1)\n  AND node_id = $nodeID\nLIMIT 50;",
           "refId": "A",
           "sql": {
             "columns": [
@@ -1038,7 +1156,7 @@
           "table": "node_configurations"
         }
       ],
-      "title": "Node configuration details",
+      "title": "Node-Konfiguration",
       "transformations": [
         {
           "id": "organize",
@@ -1047,28 +1165,28 @@
             "includeByName": {},
             "indexByName": {},
             "renameByName": {
-              "air_quality_update_interval": "Air quality update interval",
-              "air_quality_update_last_timestamp": "Air quality (Timestamp)",
-              "device_update_interval": "Device information update interval",
-              "device_update_last_timestamp": "Device information (Timestamp)",
-              "environment_update_interval": "Environment update interval",
+              "air_quality_update_interval": "Air Quality Update Interval",
+              "air_quality_update_last_timestamp": "Air Quality (Timestamp)",
+              "device_update_interval": "Device Information Update Interval",
+              "device_update_last_timestamp": "Device Information (Timestamp)",
+              "environment_update_interval": "Environment Update Interval",
               "environment_update_last_timestamp": "Environment (Timestamp)",
-              "last_updated": "Last updated",
-              "map_broadcast_interval": "Map Broadcast update interval",
+              "last_updated": "Letzte Aktualisierung",
+              "map_broadcast_interval": "Map Broadcast Update Interval",
               "map_broadcast_last_timestamp": "Map Broadcast (Timestamp)",
-              "mqtt_configured_root_topic": "Root topic at MQTT",
-              "mqtt_encryption_enabled": "Is MQTT encryption enabled",
+              "mqtt_configured_root_topic": "Root Topic in MQTT",
+              "mqtt_encryption_enabled": "MQTT encryption aktiviert",
               "mqtt_info_last_timestamp": "MQTT Info (Timestamp)",
-              "mqtt_json_enabled": "Is MQTT JSON toggled on",
-              "neighbor_info_interval": "Neighbour Info update interval",
+              "mqtt_json_enabled": "MQTT JSON aktiviert",
+              "neighbor_info_interval": "Neighbour Info Update Interval",
               "neighbor_info_last_timestamp": "Neighbour Info (Timestamp)",
               "node_id": "Node ID",
-              "pax_counter_interval": "PAX counter update interval",
-              "pax_counter_last_timestamp": "PAX counter (Timestamp)",
-              "power_update_interval": "Power update interval",
+              "pax_counter_interval": "PAX Counter Update Interval",
+              "pax_counter_last_timestamp": "PAX Counter (Timestamp)",
+              "power_update_interval": "Power Update Interval",
               "power_update_last_timestamp": "Power (Timestamp)",
-              "range_test_interval": "Range test update interval",
-              "range_test_last_packet_timestamp": "Range test (Timestamp)"
+              "range_test_interval": "Range Test Update Interval",
+              "range_test_last_packet_timestamp": "Range Test (Timestamp)"
             }
           }
         },
@@ -1086,24 +1204,46 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "P1809F7CD0C75ACF3"
+        "type": "mysql",
+        "uid": "dewlho4ubcg74b"
       },
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "continuous-GrYlRd"
+            "mode": "palette-classic"
           },
           "custom": {
-            "fillOpacity": 70,
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
             "hideFrom": {
               "legend": false,
               "tooltip": false,
               "viz": false
             },
             "insertNulls": false,
-            "lineWidth": 0,
-            "spanNulls": false
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
           },
           "mappings": [],
           "thresholds": {
@@ -1111,7 +1251,7 @@
             "steps": [
               {
                 "color": "green",
-                "value": null
+                "value": 0
               }
             ]
           },
@@ -1123,71 +1263,76 @@
         "h": 5,
         "w": 9,
         "x": 8,
-        "y": 17
+        "y": 19
       },
       "id": 6,
       "options": {
-        "alignValue": "center",
         "legend": {
+          "calcs": [],
           "displayMode": "list",
           "placement": "bottom",
-          "showLegend": false
+          "showLegend": true
         },
-        "mergeValues": true,
-        "rowHeight": 0.9,
-        "showValue": "auto",
         "tooltip": {
+          "hideZeros": false,
           "mode": "single",
           "sort": "none"
         }
       },
+      "pluginVersion": "12.1.1",
       "targets": [
         {
+          "dataset": "meshtastic",
           "datasource": {
             "type": "prometheus",
             "uid": "P1809F7CD0C75ACF3"
           },
           "disableTextWrap": false,
-          "editorMode": "builder",
+          "editorMode": "code",
           "exemplar": false,
           "expr": "topk(1, telemetry_app_relative_humidity{node_id=\"$nodeID\"})",
+          "format": "table",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "instant": false,
           "legendFormat": "{{long_name}}",
           "range": true,
+          "rawQuery": true,
+          "rawSql": "SELECT\n  relative_humidity,\n  time\nFROM\n  environment_metrics\nWHERE\n  node_id = $nodeID\n  AND relative_humidity IS NOT NULL\n  AND $__timeFilter(time)\nORDER BY\n  time;",
           "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          },
           "useBackend": false
         }
       ],
-      "title": "Humidity telemetry",
-      "transformations": [
-        {
-          "id": "seriesToRows",
-          "options": {}
-        },
-        {
-          "id": "organize",
-          "options": {
-            "excludeByName": {
-              "Metric": true
-            },
-            "includeByName": {},
-            "indexByName": {},
-            "renameByName": {}
-          }
-        }
-      ],
-      "type": "state-timeline"
+      "title": "Luftfeuchtigkeit",
+      "type": "timeseries"
     },
     {
       "datasource": {
-        "type": "grafana-postgresql-datasource",
-        "uid": "PA942B37CCFAF5A81"
+        "type": "mysql",
+        "uid": "dewlho4ubcg74b"
       },
+      "description": "Zeig den gefundenen Node auf einer Karte an.",
       "fieldConfig": {
         "defaults": {
           "color": {
+            "fixedColor": "dark-blue",
             "mode": "thresholds"
           },
           "custom": {
@@ -1202,7 +1347,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
               }
             ]
           }
@@ -1210,24 +1356,27 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 7,
+        "h": 8,
         "w": 8,
         "x": 0,
-        "y": 20
+        "y": 21
       },
       "id": 13,
       "options": {
         "basemap": {
-          "config": {},
+          "config": {
+            "server": "streets",
+            "showLabels": true,
+            "theme": "auto"
+          },
           "name": "Layer 0",
-          "tooltip": true,
-          "type": "osm-standard"
+          "type": "xyz"
         },
         "controls": {
-          "mouseWheelZoom": true,
-          "showAttribution": true,
+          "mouseWheelZoom": false,
+          "showAttribution": false,
           "showDebug": false,
-          "showMeasure": false,
+          "showMeasure": true,
           "showScale": true,
           "showZoom": true
         },
@@ -1237,9 +1386,9 @@
               "showLegend": false,
               "style": {
                 "color": {
-                  "fixed": "dark-green"
+                  "fixed": "dark-blue"
                 },
-                "opacity": 0.4,
+                "opacity": 0.8,
                 "rotation": {
                   "fixed": 0,
                   "max": 360,
@@ -1247,7 +1396,7 @@
                   "mode": "mod"
                 },
                 "size": {
-                  "fixed": 5,
+                  "fixed": 8,
                   "max": 15,
                   "min": 2
                 },
@@ -1268,49 +1417,44 @@
                 }
               }
             },
+            "filterData": {
+              "id": "byRefId",
+              "options": "nodes"
+            },
+            "layer-tooltip": true,
             "location": {
               "mode": "auto"
             },
-            "name": "Layer 1",
+            "name": "nodes",
             "tooltip": true,
             "type": "markers"
           }
         ],
         "tooltip": {
-          "mode": "none"
+          "mode": "details"
         },
         "view": {
           "allLayers": true,
-          "id": "coords",
-          "lastOnly": false,
-          "lat": 31.499467,
-          "layer": "Layer 1",
-          "lon": 34.669663,
-          "padding": 2,
-          "zoom": 6.53
+          "id": "fit",
+          "lat": 51.316564,
+          "lon": 12.316329,
+          "zoom": 15
         }
       },
-      "pluginVersion": "11.1.0",
+      "pluginVersion": "12.1.1",
       "targets": [
         {
-          "datasource": {
-            "type": "grafana-postgresql-datasource",
-            "uid": "PA942B37CCFAF5A81"
-          },
+          "dataset": "meshtastic",
           "editorMode": "code",
           "format": "table",
+          "hide": false,
           "rawQuery": true,
-          "rawSql": "SELECT node_id, short_name, long_name, hardware_model, role, mqtt_status, \nlongitude * 1e-7 as longitude,\nlatitude * 1e-7 as latitude,\naltitude\nFROM node_details \nWHERE node_id = '${nodeID}' LIMIT 1",
-          "refId": "A",
+          "rawSql": "SELECT\n  node_id AS \"Node ID\",\n  short_name AS \"Kurzname\",\n  long_name AS \"Langname\",\n  hardware_model AS \"Hardware\",\n  role AS \"Rolle\",\n  latitude AS \"Latitude\",\n  longitude AS \"Longitude\",\n  altitude AS \"Altitude\",\n  precision_bits AS \"Präzision\"\nFROM\n  node_details\nWHERE\n  longitude != 0\n  AND longitude != 0\n  AND node_id IN($nodeID)\nGROUP BY\n  node_id",
+          "refId": "nodes",
           "sql": {
             "columns": [
               {
-                "parameters": [
-                  {
-                    "name": "*",
-                    "type": "functionParameter"
-                  }
-                ],
+                "parameters": [],
                 "type": "function"
               }
             ],
@@ -1322,72 +1466,63 @@
                 "type": "groupBy"
               }
             ],
-            "limit": 50,
-            "whereJsonTree": {
-              "children1": [
-                {
-                  "id": "abb9a8b8-4567-489a-bcde-f190ef655acf",
-                  "properties": {
-                    "field": "node_id",
-                    "fieldSrc": "field",
-                    "operator": "equal",
-                    "value": [
-                      "${nodeID}"
-                    ],
-                    "valueError": [
-                      null
-                    ],
-                    "valueSrc": [
-                      "value"
-                    ],
-                    "valueType": [
-                      "text"
-                    ]
-                  },
-                  "type": "rule"
-                }
-              ],
-              "id": "aabba98a-0123-4456-b89a-b190ef5f79f0",
-              "properties": {
-                "conjunction": "AND"
-              },
-              "type": "group"
-            },
-            "whereString": "node_id = '${nodeID}'"
-          },
-          "table": "node_details"
+            "limit": 50
+          }
         }
       ],
-      "title": "Panel Title",
+      "title": "Standort",
       "type": "geomap"
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "P1809F7CD0C75ACF3"
+        "type": "mysql",
+        "uid": "dewlho4ubcg74b"
       },
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "continuous-GrYlRd"
+            "mode": "palette-classic"
           },
           "custom": {
-            "fillOpacity": 70,
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
             "hideFrom": {
               "legend": false,
               "tooltip": false,
               "viz": false
             },
             "insertNulls": false,
-            "lineWidth": 0,
-            "spanNulls": false
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
           },
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
               }
             ]
           },
@@ -1399,44 +1534,64 @@
         "h": 5,
         "w": 9,
         "x": 8,
-        "y": 22
+        "y": 24
       },
       "id": 7,
       "options": {
-        "alignValue": "center",
         "legend": {
+          "calcs": [],
           "displayMode": "list",
           "placement": "bottom",
-          "showLegend": false
+          "showLegend": true
         },
-        "mergeValues": true,
-        "rowHeight": 0.9,
-        "showValue": "auto",
         "tooltip": {
+          "hideZeros": false,
           "mode": "single",
           "sort": "none"
         }
       },
+      "pluginVersion": "12.1.1",
       "targets": [
         {
+          "dataset": "meshtastic",
           "datasource": {
             "type": "prometheus",
             "uid": "P1809F7CD0C75ACF3"
           },
           "disableTextWrap": false,
-          "editorMode": "builder",
+          "editorMode": "code",
           "exemplar": false,
           "expr": "topk(1, telemetry_app_barometric_pressure{node_id=\"$nodeID\"})",
+          "format": "table",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "instant": false,
           "legendFormat": "{{long_name}}",
           "range": true,
+          "rawQuery": true,
+          "rawSql": "SELECT\n  barometric_pressure,\n  time\nFROM\n  environment_metrics\nWHERE\n  node_id = $nodeID\n  AND barometric_pressure IS NOT NULL\n  AND $__timeFilter(time)\nORDER BY\n  time;",
           "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          },
           "useBackend": false
         }
       ],
-      "title": "Barometric pressure telemetry",
+      "title": "Luftdruck",
       "transformations": [
         {
           "id": "seriesToRows",
@@ -1454,12 +1609,12 @@
           }
         }
       ],
-      "type": "state-timeline"
+      "type": "timeseries"
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "P1809F7CD0C75ACF3"
+        "type": "mysql",
+        "uid": "dewlho4ubcg74b"
       },
       "fieldConfig": {
         "defaults": {
@@ -1472,9 +1627,8 @@
             "axisColorMode": "text",
             "axisLabel": "",
             "axisPlacement": "auto",
-            "axisSoftMax": 110,
-            "axisSoftMin": 0,
             "barAlignment": 0,
+            "barWidthFactor": 0.6,
             "drawStyle": "line",
             "fillOpacity": 5,
             "gradientMode": "none",
@@ -1501,19 +1655,22 @@
             }
           },
           "mappings": [],
+          "max": 100,
+          "min": 0,
           "thresholds": {
             "mode": "percentage",
             "steps": [
               {
-                "color": "red"
+                "color": "red",
+                "value": 0
               },
               {
-                "color": "#EAB839",
-                "value": 20
+                "color": "yellow",
+                "value": 40
               },
               {
                 "color": "green",
-                "value": 40
+                "value": 60
               }
             ]
           },
@@ -1525,7 +1682,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 27
+        "y": 29
       },
       "id": 2,
       "options": {
@@ -1536,19 +1693,21 @@
           "showLegend": false
         },
         "tooltip": {
+          "hideZeros": false,
           "mode": "single",
           "sort": "none"
         }
       },
-      "pluginVersion": "11.1.0",
+      "pluginVersion": "12.1.1",
       "targets": [
         {
+          "dataset": "meshtastic",
           "datasource": {
             "type": "prometheus",
             "uid": "P1809F7CD0C75ACF3"
           },
           "disableTextWrap": false,
-          "editorMode": "builder",
+          "editorMode": "code",
           "exemplar": false,
           "expr": "telemetry_app_battery_level{node_id=\"$nodeID\"}",
           "format": "time_series",
@@ -1557,17 +1716,36 @@
           "instant": false,
           "legendFormat": "{{long_name}} | Model: {{hardware_model}} | Role: {{role}}",
           "range": true,
+          "rawQuery": true,
+          "rawSql": "SELECT\n  device_time AS time,\n  battery_level\nFROM\n  node_telemetry\nWHERE\n  $__timeFilter(device_time)\n  AND battery_level IS NOT NULL\n  AND node_id IN ($nodeID)\nGROUP BY\n  device_time\nORDER BY\n  device_time;",
           "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          },
           "useBackend": false
         }
       ],
-      "title": "Battery Level",
+      "title": "Batterie",
       "type": "timeseries"
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "P1809F7CD0C75ACF3"
+        "type": "mysql",
+        "uid": "dewlho4ubcg74b"
       },
       "fieldConfig": {
         "defaults": {
@@ -1581,6 +1759,7 @@
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
+            "barWidthFactor": 0.6,
             "drawStyle": "line",
             "fillOpacity": 5,
             "gradientMode": "none",
@@ -1603,15 +1782,26 @@
               "mode": "none"
             },
             "thresholdsStyle": {
-              "mode": "off"
+              "mode": "area"
             }
           },
           "mappings": [],
+          "max": 2,
+          "min": 0,
           "thresholds": {
-            "mode": "absolute",
+            "mode": "percentage",
             "steps": [
               {
-                "color": "green"
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "yellow",
+                "value": 40
+              },
+              {
+                "color": "green",
+                "value": 60
               }
             ]
           },
@@ -1623,7 +1813,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 27
+        "y": 29
       },
       "id": 3,
       "options": {
@@ -1634,38 +1824,60 @@
           "showLegend": false
         },
         "tooltip": {
+          "hideZeros": false,
           "mode": "single",
           "sort": "none"
         }
       },
-      "pluginVersion": "11.1.0",
+      "pluginVersion": "12.1.1",
       "targets": [
         {
+          "dataset": "meshtastic",
           "datasource": {
             "type": "prometheus",
             "uid": "P1809F7CD0C75ACF3"
           },
           "disableTextWrap": false,
-          "editorMode": "builder",
+          "editorMode": "code",
           "expr": "telemetry_app_voltage{node_id=\"$nodeID\"}",
+          "format": "table",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "instant": false,
           "legendFormat": "{{long_name}} | Model: {{hardware_model}} | Role: {{role}}",
           "range": true,
+          "rawQuery": true,
+          "rawSql": "SELECT\n  device_time AS time,\n  voltage\nFROM\n  node_telemetry\nWHERE\n  $__timeFilter(device_time)\n  AND voltage IS NOT NULL\n  AND node_id IN ($nodeID)\nGROUP BY\n  device_time\nORDER BY\n  device_time;",
           "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          },
           "useBackend": false
         }
       ],
-      "title": "Device voltage",
+      "title": "Spannung",
       "type": "timeseries"
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "P1809F7CD0C75ACF3"
+        "type": "mysql",
+        "uid": "dewlho4ubcg74b"
       },
-      "description": "Displays the measured current from the channels (1,2,3)",
+      "description": "Zeigt den gemessenen Strom aus den Kanälen (1, 2, 3) an.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1678,6 +1890,7 @@
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
+            "barWidthFactor": 0.6,
             "drawStyle": "line",
             "fillOpacity": 0,
             "gradientMode": "none",
@@ -1708,11 +1921,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
-              },
-              {
-                "color": "red",
-                "value": 80
+                "color": "green",
+                "value": 0
               }
             ]
           },
@@ -1724,7 +1934,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 35
+        "y": 37
       },
       "id": 18,
       "options": {
@@ -1735,10 +1945,12 @@
           "showLegend": true
         },
         "tooltip": {
+          "hideZeros": false,
           "mode": "single",
           "sort": "none"
         }
       },
+      "pluginVersion": "12.1.1",
       "targets": [
         {
           "datasource": {
@@ -1746,60 +1958,46 @@
             "uid": "P1809F7CD0C75ACF3"
           },
           "disableTextWrap": false,
-          "editorMode": "builder",
+          "editorMode": "code",
           "expr": "telemetry_app_ch1_current{node_id=\"$nodeID\"}",
+          "format": "table",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "instant": false,
           "legendFormat": "Channel 1",
           "range": true,
+          "rawQuery": true,
+          "rawSql": "SELECT\n  time,\n  ch1_current,\n  ch2_current,\n  ch3_current\nFROM\n  power_metrics\nWHERE\n  $__timeFilter(time)\n  AND (\n    ch1_current IS NOT NULL\n    OR ch2_current IS NOT NULL\n    OR ch3_current IS NOT NULL\n  )\n  AND node_id IN ($nodeID)\nGROUP BY\n  time\nORDER BY\n  time;",
           "refId": "A",
-          "useBackend": false
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "P1809F7CD0C75ACF3"
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
           },
-          "disableTextWrap": false,
-          "editorMode": "builder",
-          "expr": "telemetry_app_ch2_current{node_id=\"$nodeID\"}",
-          "fullMetaSearch": false,
-          "hide": false,
-          "includeNullMetadata": true,
-          "instant": false,
-          "legendFormat": "Channel 2",
-          "range": true,
-          "refId": "B",
-          "useBackend": false
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "P1809F7CD0C75ACF3"
-          },
-          "disableTextWrap": false,
-          "editorMode": "builder",
-          "expr": "telemetry_app_ch3_current{node_id=\"$nodeID\"}",
-          "fullMetaSearch": false,
-          "hide": false,
-          "includeNullMetadata": true,
-          "instant": false,
-          "legendFormat": "Channel 3",
-          "range": true,
-          "refId": "C",
           "useBackend": false
         }
       ],
-      "title": "Current measured from node",
+      "title": "Strommessung",
       "type": "timeseries"
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "P1809F7CD0C75ACF3"
+        "type": "mysql",
+        "uid": "dewlho4ubcg74b"
       },
-      "description": "Measures the volage on channels (1,2,3)",
+      "description": "Zeigt die gemessenen Spannung aus den Kanälen (1, 2, 3) an.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1812,6 +2010,7 @@
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
+            "barWidthFactor": 0.6,
             "drawStyle": "line",
             "fillOpacity": 0,
             "gradientMode": "none",
@@ -1842,11 +2041,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
-              },
-              {
-                "color": "red",
-                "value": 80
+                "color": "green",
+                "value": 0
               }
             ]
           },
@@ -1858,7 +2054,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 35
+        "y": 37
       },
       "id": 19,
       "options": {
@@ -1869,130 +2065,103 @@
           "showLegend": true
         },
         "tooltip": {
+          "hideZeros": false,
           "mode": "single",
           "sort": "none"
         }
       },
+      "pluginVersion": "12.1.1",
       "targets": [
         {
+          "dataset": "meshtastic",
           "datasource": {
-            "type": "prometheus",
-            "uid": "P1809F7CD0C75ACF3"
+            "type": "mysql",
+            "uid": "dewlho4ubcg74b"
           },
-          "disableTextWrap": false,
-          "editorMode": "builder",
-          "expr": "telemetry_app_ch1_voltage{node_id=\"$nodeID\"}",
-          "fullMetaSearch": false,
-          "includeNullMetadata": true,
-          "instant": false,
-          "legendFormat": "Channel 1",
-          "range": true,
+          "editorMode": "code",
+          "format": "table",
+          "hide": false,
+          "rawQuery": true,
+          "rawSql": "SELECT\n  time,\n  ch1_voltage,\n  ch2_voltage,\n  ch3_voltage\nFROM\n  power_metrics\nWHERE\n  $__timeFilter(time)\n  AND (\n    ch1_voltage IS NOT NULL\n    OR ch2_voltage IS NOT NULL\n    OR ch3_voltage IS NOT NULL\n  )\n  AND node_id IN ($nodeID)\nGROUP BY\n  time\nORDER BY\n  time;",
           "refId": "A",
-          "useBackend": false
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "P1809F7CD0C75ACF3"
-          },
-          "disableTextWrap": false,
-          "editorMode": "builder",
-          "expr": "telemetry_app_ch2_voltage{node_id=\"$nodeID\"}",
-          "fullMetaSearch": false,
-          "hide": false,
-          "includeNullMetadata": true,
-          "instant": false,
-          "legendFormat": "Channel 2",
-          "range": true,
-          "refId": "B",
-          "useBackend": false
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "P1809F7CD0C75ACF3"
-          },
-          "disableTextWrap": false,
-          "editorMode": "builder",
-          "expr": "telemetry_app_ch3_voltage{node_id=\"$nodeID\"}",
-          "fullMetaSearch": false,
-          "hide": false,
-          "includeNullMetadata": true,
-          "instant": false,
-          "legendFormat": "Channel 3",
-          "range": true,
-          "refId": "C",
-          "useBackend": false
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
         }
       ],
-      "title": "Voltage measured by the node",
+      "title": "Spannungsmessung",
       "type": "timeseries"
     }
   ],
-  "refresh": "1m",
-  "schemaVersion": 39,
+  "preload": false,
+  "schemaVersion": 41,
   "tags": [],
   "templating": {
     "list": [
       {
         "current": {
-          "selected": false,
-          "text": "🐦‍🔥:34GL3 (3944975137)",
-          "value": "3944975137"
+          "text": "≈ (2956809808)",
+          "value": "2956809808"
         },
         "datasource": {
           "type": "mysql",
-          "uid": "PA942B37CCFAF5A81"
+          "uid": "dewlho4ubcg74b"
         },
-        "definition": "SELECT \n  concat(long_name, ' (', node_id, ')') as __text, \n  node_id as __value \nFROM node_details \nORDER BY long_name",
-        "hide": 0,
+        "definition": "SELECT \n  CONCAT(long_name, \" \", \"(\", node_id, \")\") AS __text, \n  node_id as __value\nFROM node_details \nORDER BY long_name ASC;",
         "includeAll": false,
         "label": "Node ID",
-        "multi": false,
         "name": "nodeID",
         "options": [],
-        "query": "SELECT \n  concat(long_name, ' (', node_id, ')') as __text, \n  node_id as __value \nFROM node_details \nORDER BY long_name",
+        "query": "SELECT \n  CONCAT(long_name, \" \", \"(\", node_id, \")\") AS __text, \n  node_id as __value\nFROM node_details \nORDER BY long_name ASC;",
         "refresh": 1,
         "regex": "",
-        "skipUrlSync": false,
-        "sort": 0,
         "type": "query"
       },
       {
         "current": {
-          "selected": false,
-          "text": "3944975137",
-          "value": "3944975137"
+          "text": "",
+          "value": ""
         },
         "datasource": {
           "type": "mysql",
-          "uid": "PA942B37CCFAF5A81"
+          "uid": "dewlho4ubcg74b"
         },
-        "definition": "SELECT \n    neighbor_id AS \"source\",\n    node_id AS \"target\"\nFROM \n    node_neighbors\nWHERE node_id = ${nodeID:singlequote} OR neighbor_id = ${nodeID:singlequote}",
+        "definition": "SELECT\n  neighbor_id AS \"source\",\n  node_id AS \"target\"\nFROM\n   node_neighbors\nWHERE\n  node_id = \"${nodeID}\"\n  OR neighbor_id = \"${nodeID}\"",
         "description": "",
         "hide": 2,
         "includeAll": false,
         "label": "relatives",
-        "multi": false,
         "name": "relatives",
         "options": [],
-        "query": "SELECT \n    neighbor_id AS \"source\",\n    node_id AS \"target\"\nFROM \n    node_neighbors\nWHERE node_id = ${nodeID:singlequote} OR neighbor_id = ${nodeID:singlequote}",
+        "query": "SELECT\n  neighbor_id AS \"source\",\n  node_id AS \"target\"\nFROM\n   node_neighbors\nWHERE\n  node_id = \"${nodeID}\"\n  OR neighbor_id = \"${nodeID}\"",
         "refresh": 2,
         "regex": "",
-        "skipUrlSync": false,
-        "sort": 0,
         "type": "query"
       }
     ]
   },
   "time": {
-    "from": "now-6h",
+    "from": "now-12h",
     "to": "now"
   },
   "timepicker": {},
-  "timezone": "browser",
-  "title": "Node Dashboard",
-  "uid": "edqo1uh0eglq8g",
-  "version": 52,
-  "weekStart": ""
+  "timezone": "",
+  "title": "Node Übersicht",
+  "uid": "58b708bf-3653-4992-8bae-d3b859e74a0d",
+  "version": 70,
+  "weekStart": "monday"
 }

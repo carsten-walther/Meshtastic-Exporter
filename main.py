@@ -13,10 +13,6 @@ from app.utilities.database_handler import DatabaseHandler
 from app.utilities.interface import Interface
 
 
-#
-# https://github.com/tcivie/meshtastic-metrics-exporter
-#
-
 def handle_message(packet):
     try:
         packet = interface.packet(packet)
