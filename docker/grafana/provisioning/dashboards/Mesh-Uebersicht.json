@@ -47,7 +47,7 @@
         "type": "mysql",
         "uid": "dewlho4ubcg74b"
       },
-      "description": "Gesamtzahl der beobachteten Knoten im Netz",
+      "description": "Gesamtzahl der beobachteten Nodes im Netz",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -213,7 +213,7 @@
         "type": "mysql",
         "uid": "dewlho4ubcg74b"
       },
-      "description": "Wie viele Knoten sind bekannt?",
+      "description": "Wie viele Nodes sind bekannt?",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -302,7 +302,7 @@
         "type": "mysql",
         "uid": "dewlho4ubcg74b"
       },
-      "description": "Wie viele Knoten sind unbekannt?\nDie unbekannten sind diejenigen, die entweder NULL in ihrem langen Namen oder „Unbekannt“ in ihrem Wert haben.",
+      "description": "Wie viele Nodes sind unbekannt?\n\nDie unbekannten sind diejenigen, die entweder NULL in ihrem langen Namen oder „Unbekannt“ in ihrem Wert haben.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -644,7 +644,7 @@
               },
               {
                 "color": "red",
-                "value": 8
+                "value": 10
               }
             ]
           },
@@ -777,7 +777,7 @@
               },
               {
                 "color": "red",
-                "value": 8
+                "value": 10
               }
             ]
           },
@@ -857,7 +857,7 @@
         "type": "mysql",
         "uid": "dewlho4ubcg74b"
       },
-      "description": "Zeigt die Arten von Paketen im ausgewählten Zeitbereich an.\nFor more details see:\nhttps://buf.build/meshtastic/protobufs/docs/main:meshtastic#meshtastic.PortNum",
+      "description": "Zeigt die Arten von Paketen im ausgewählten Zeitbereich an.\n\nWeitere Informationen finden Sie unter:\nhttps://buf.build/meshtastic/protobufs/docs/main:meshtastic#meshtastic.PortNum",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -876,7 +876,7 @@
       },
       "gridPos": {
         "h": 15,
-        "w": 7,
+        "w": 8,
         "x": 0,
         "y": 14
       },
@@ -1095,8 +1095,8 @@
       },
       "gridPos": {
         "h": 15,
-        "w": 17,
-        "x": 7,
+        "w": 16,
+        "x": 8,
         "y": 14
       },
       "id": 4,
@@ -1268,12 +1268,17 @@
                   "horizontal": "center",
                   "vertical": "center"
                 },
+                "text": {
+                  "field": "Langname",
+                  "fixed": "",
+                  "mode": "field"
+                },
                 "textConfig": {
                   "fontSize": 12,
-                  "offsetX": 0,
-                  "offsetY": 0,
-                  "textAlign": "center",
-                  "textBaseline": "middle"
+                  "offsetX": 10,
+                  "offsetY": -5,
+                  "textAlign": "left",
+                  "textBaseline": "bottom"
                 }
               }
             },
@@ -1335,7 +1340,7 @@
           }
         }
       ],
-      "title": "Nodepositionen",
+      "title": "Standorte",
       "type": "geomap"
     }
   ],
@@ -1380,6 +1385,6 @@
   "timezone": "",
   "title": "Mesh Übersicht",
   "uid": "cewd4hhhj2i9sa",
-  "version": 40,
+  "version": 49,
   "weekStart": "monday"
 }

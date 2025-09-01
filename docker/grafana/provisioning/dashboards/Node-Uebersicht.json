@@ -108,7 +108,7 @@
         "type": "mysql",
         "uid": "dewlho4ubcg74b"
       },
-      "description": "Zeigt die Arten von Paketen im ausgewählten Zeitbereich an.\nFor more details see:\nhttps://buf.build/meshtastic/protobufs/docs/main:meshtastic#meshtastic.PortNum",
+      "description": "Zeigt die Arten von Paketen im ausgewählten Zeitbereich an.\n\nWeitere Informationen finden Sie unter: https://buf.build/meshtastic/protobufs/docs/main:meshtastic#meshtastic.PortNum",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -168,7 +168,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT\n  portnum,\n  COUNT(*) as count\nFROM\n  mesh_packet_metrics\nWHERE\n  $__timeFilter(time)\n  AND source_id IN ($nodeID)\nGROUP BY\n  portnum\nORDER BY\n  time DESC;",
+          "rawSql": "SELECT\n  portnum,\n  COUNT(*) as count\nFROM\n  mesh_packet_metrics\nWHERE\n  $__timeFilter(time)\n  AND source_id IN ($nodeID)\nGROUP BY\n  portnum\nORDER BY\n  time;",
           "refId": "A",
           "sql": {
             "columns": [
@@ -254,7 +254,7 @@
           "legendFormat": "__auto",
           "range": true,
           "rawQuery": true,
-          "rawSql": "SELECT\n  *\nFROM\n  mesh_packet_metrics\nWHERE\n  $__timeFilter(time)\n  AND source_id IN ($nodeID)\nORDER BY\n  time DESC;",
+          "rawSql": "SELECT\n  *\nFROM\n  mesh_packet_metrics\nWHERE\n  $__timeFilter(time)\n  AND source_id IN ($nodeID)\nORDER BY\n  time;",
           "refId": "A",
           "sql": {
             "columns": [
@@ -365,7 +365,7 @@
         "type": "mysql",
         "uid": "dewlho4ubcg74b"
       },
-      "description": "Zeigt die Arten von Paketen im ausgewählten Zeitbereich an.\nFor more details see:\nhttps://buf.build/meshtastic/protobufs/docs/main:meshtastic#meshtastic.PortNum",
+      "description": "Zeigt die Arten von Paketen im ausgewählten Zeitbereich an.\n\nWeitere Informationen finden Sie unter:\nhttps://buf.build/meshtastic/protobufs/docs/main:meshtastic#meshtastic.PortNum",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -425,7 +425,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT\n  portnum,\n  COUNT(*) as count\nFROM\n  mesh_packet_metrics\nWHERE\n  $__timeFilter(time)\n  AND destination_id IN ($nodeID)\nGROUP BY\n  portnum\nORDER BY\n  time DESC;",
+          "rawSql": "SELECT\n  portnum,\n  COUNT(*) as count\nFROM\n  mesh_packet_metrics\nWHERE\n  $__timeFilter(time)\n  AND destination_id IN ($nodeID)\nGROUP BY\n  portnum\nORDER BY\n  time;",
           "refId": "A",
           "sql": {
             "columns": [
@@ -511,7 +511,7 @@
           "legendFormat": "__auto",
           "range": true,
           "rawQuery": true,
-          "rawSql": "SELECT\n  *\nFROM\n  mesh_packet_metrics\nWHERE\n  $__timeFilter(time)\n  AND destination_id IN ($nodeID)\nORDER BY\n  time DESC;",
+          "rawSql": "SELECT\n  *\nFROM\n  mesh_packet_metrics\nWHERE\n  $__timeFilter(time)\n  AND destination_id IN ($nodeID)\nORDER BY\n  time;",
           "refId": "A",
           "sql": {
             "columns": [
@@ -977,7 +977,7 @@
       },
       "gridPos": {
         "h": 5,
-        "w": 9,
+        "w": 8,
         "x": 8,
         "y": 14
       },
@@ -1073,8 +1073,8 @@
       },
       "gridPos": {
         "h": 15,
-        "w": 7,
-        "x": 17,
+        "w": 8,
+        "x": 16,
         "y": 14
       },
       "id": 17,
@@ -1101,7 +1101,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT\n  node_id,\n  \n  -- Environment Update Informationen\n  CASE\n    WHEN environment_update_interval_sec > 1\n    THEN SEC_TO_TIME(environment_update_interval_sec)\n    ELSE NULL\n  END AS environment_update_interval,\n  DATE_FORMAT(environment_update_last_timestamp, '%Y-%m-%d %H:%i:%s') AS environment_update_last_timestamp,\n  \n  -- Device Update Informationen  \n  CASE\n    WHEN device_update_interval_sec > 1\n    THEN SEC_TO_TIME(device_update_interval_sec)\n    ELSE NULL\n  END AS device_update_interval,\n  DATE_FORMAT(device_update_last_timestamp, '%Y-%m-%d %H:%i:%s') AS device_update_last_timestamp,\n  \n  -- Air Quality Update Informationen\n  CASE\n    WHEN air_quality_update_interval_sec > 1\n    THEN SEC_TO_TIME(air_quality_update_interval_sec)\n    ELSE NULL\n  END AS air_quality_update_interval,\n  DATE_FORMAT(air_quality_update_last_timestamp, '%Y-%m-%d %H:%i:%s') AS air_quality_update_last_timestamp,\n  \n  -- Power Update Informationen\n  CASE\n    WHEN power_update_interval_sec > 1\n    THEN SEC_TO_TIME(power_update_interval_sec)\n    ELSE NULL\n  END AS power_update_interval,\n  DATE_FORMAT(power_update_last_timestamp, '%Y-%m-%d %H:%i:%s') AS power_update_last_timestamp,\n  \n  -- Range Test Informationen\n  CASE\n    WHEN range_test_interval_sec > 1\n    THEN SEC_TO_TIME(range_test_interval_sec)\n    ELSE NULL\n  END AS range_test_interval,\n  DATE_FORMAT(range_test_last_packet_timestamp, '%Y-%m-%d %H:%i:%s') AS range_test_last_packet_timestamp,\n  \n  -- PAX Counter Informationen\n  CASE\n    WHEN pax_counter_interval_sec > 1\n    THEN SEC_TO_TIME(pax_counter_interval_sec)\n    ELSE NULL\n  END AS pax_counter_interval,\n  DATE_FORMAT(pax_counter_last_timestamp, '%Y-%m-%d %H:%i:%s') AS pax_counter_last_timestamp,\n  \n  -- Neighbor Info Informationen\n  CASE\n    WHEN neighbor_info_interval_sec > 1\n    THEN SEC_TO_TIME(neighbor_info_interval_sec)\n    ELSE NULL\n  END AS neighbor_info_interval,\n  DATE_FORMAT(neighbor_info_last_timestamp, '%Y-%m-%d %H:%i:%s') AS neighbor_info_last_timestamp,\n  \n  -- Map Broadcast Informationen\n  CASE\n    WHEN map_broadcast_interval_sec > 1\n    THEN SEC_TO_TIME(map_broadcast_interval_sec)\n    ELSE NULL\n  END AS map_broadcast_interval,\n  DATE_FORMAT(map_broadcast_last_timestamp, '%Y-%m-%d %H:%i:%s') AS map_broadcast_last_timestamp,\n  \n  -- MQTT Informationen\n  mqtt_encryption_enabled,\n  mqtt_json_enabled,\n  mqtt_configured_root_topic,\n  DATE_FORMAT(mqtt_info_last_timestamp, '%Y-%m-%d %H:%i:%s') AS mqtt_info_last_timestamp,\n  \n  -- Letzte Aktualisierung\n  DATE_FORMAT(last_updated, '%Y-%m-%d %H:%i:%s') AS last_updated\n  \nFROM node_configurations\nWHERE\n  (environment_update_interval_sec > 1 OR\n   device_update_interval_sec > 1 OR\n   air_quality_update_interval_sec > 1 OR\n   power_update_interval_sec > 1 OR\n   range_test_interval_sec > 1 OR\n   pax_counter_interval_sec > 1 OR\n   neighbor_info_interval_sec > 1 OR\n   map_broadcast_interval_sec > 1)\n  AND node_id = $nodeID\nLIMIT 50;",
+          "rawSql": "SELECT\n  node_id,\n  \n  -- Environment Update Informationen\n  CASE\n    WHEN environment_update_interval_sec > 1\n    THEN SEC_TO_TIME(environment_update_interval_sec)\n    ELSE NULL\n  END AS environment_update_interval,\n  DATE_FORMAT(environment_update_last_timestamp, '%Y-%m-%d %H:%i:%s') AS environment_update_last_timestamp,\n  \n  -- Device Update Informationen  \n  CASE\n    WHEN device_update_interval_sec > 1\n    THEN SEC_TO_TIME(device_update_interval_sec)\n    ELSE NULL\n  END AS device_update_interval,\n  DATE_FORMAT(device_update_last_timestamp, '%Y-%m-%d %H:%i:%s') AS device_update_last_timestamp,\n  \n  -- Air Quality Update Informationen\n  CASE\n    WHEN air_quality_update_interval_sec > 1\n    THEN SEC_TO_TIME(air_quality_update_interval_sec)\n    ELSE NULL\n  END AS air_quality_update_interval,\n  DATE_FORMAT(air_quality_update_last_timestamp, '%Y-%m-%d %H:%i:%s') AS air_quality_update_last_timestamp,\n  \n  -- Power Update Informationen\n  CASE\n    WHEN power_update_interval_sec > 1\n    THEN SEC_TO_TIME(power_update_interval_sec)\n    ELSE NULL\n  END AS power_update_interval,\n  DATE_FORMAT(power_update_last_timestamp, '%Y-%m-%d %H:%i:%s') AS power_update_last_timestamp,\n  \n  -- Range Test Informationen\n  CASE\n    WHEN range_test_interval_sec > 1\n    THEN SEC_TO_TIME(range_test_interval_sec)\n    ELSE NULL\n  END AS range_test_interval,\n  DATE_FORMAT(range_test_last_packet_timestamp, '%Y-%m-%d %H:%i:%s') AS range_test_last_packet_timestamp,\n  \n  -- PAX Counter Informationen\n  CASE\n    WHEN pax_counter_interval_sec > 1\n    THEN SEC_TO_TIME(pax_counter_interval_sec)\n    ELSE NULL\n  END AS pax_counter_interval,\n  DATE_FORMAT(pax_counter_last_timestamp, '%Y-%m-%d %H:%i:%s') AS pax_counter_last_timestamp,\n  \n  -- Neighbor Info Informationen\n  CASE\n    WHEN neighbor_info_interval_sec > 1\n    THEN SEC_TO_TIME(neighbor_info_interval_sec)\n    ELSE NULL\n  END AS neighbor_info_interval,\n  DATE_FORMAT(neighbor_info_last_timestamp, '%Y-%m-%d %H:%i:%s') AS neighbor_info_last_timestamp,\n  \n  -- Map Broadcast Informationen\n  CASE\n    WHEN map_broadcast_interval_sec > 1\n    THEN SEC_TO_TIME(map_broadcast_interval_sec)\n    ELSE NULL\n  END AS map_broadcast_interval,\n  DATE_FORMAT(map_broadcast_last_timestamp, '%Y-%m-%d %H:%i:%s') AS map_broadcast_last_timestamp,\n  \n  -- MQTT Informationen\n  mqtt_encryption_enabled,\n  mqtt_json_enabled,\n  mqtt_configured_root_topic,\n  DATE_FORMAT(mqtt_info_last_timestamp, '%Y-%m-%d %H:%i:%s') AS mqtt_info_last_timestamp,\n  \n  -- Letzte Aktualisierung\n  DATE_FORMAT(last_updated, '%Y-%m-%d %H:%i:%s') AS last_updated\n  \nFROM node_configurations\nWHERE\n  (environment_update_interval_sec > 1 OR\n   device_update_interval_sec > 1 OR\n   air_quality_update_interval_sec > 1 OR\n   power_update_interval_sec > 1 OR\n   range_test_interval_sec > 1 OR\n   pax_counter_interval_sec > 1 OR\n   neighbor_info_interval_sec > 1 OR\n   map_broadcast_interval_sec > 1)\n  AND node_id IN ($nodeID)",
           "refId": "A",
           "sql": {
             "columns": [
@@ -1261,7 +1261,7 @@
       },
       "gridPos": {
         "h": 5,
-        "w": 9,
+        "w": 8,
         "x": 8,
         "y": 19
       },
@@ -1532,7 +1532,7 @@
       },
       "gridPos": {
         "h": 5,
-        "w": 9,
+        "w": 8,
         "x": 8,
         "y": 24
       },
@@ -1619,7 +1619,7 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "palette-classic"
+            "mode": "thresholds"
           },
           "custom": {
             "axisBorderShow": false,
@@ -1631,7 +1631,7 @@
             "barWidthFactor": 0.6,
             "drawStyle": "line",
             "fillOpacity": 5,
-            "gradientMode": "none",
+            "gradientMode": "scheme",
             "hideFrom": {
               "legend": false,
               "tooltip": false,
@@ -1651,12 +1651,10 @@
               "mode": "none"
             },
             "thresholdsStyle": {
-              "mode": "area"
+              "mode": "dashed+area"
             }
           },
           "mappings": [],
-          "max": 100,
-          "min": 0,
           "thresholds": {
             "mode": "percentage",
             "steps": [
@@ -1665,12 +1663,16 @@
                 "value": 0
               },
               {
+                "color": "orange",
+                "value": 20
+              },
+              {
                 "color": "yellow",
-                "value": 40
+                "value": 50
               },
               {
                 "color": "green",
-                "value": 60
+                "value": 80
               }
             ]
           },
@@ -1717,7 +1719,7 @@
           "legendFormat": "{{long_name}} | Model: {{hardware_model}} | Role: {{role}}",
           "range": true,
           "rawQuery": true,
-          "rawSql": "SELECT\n  device_time AS time,\n  battery_level\nFROM\n  node_telemetry\nWHERE\n  $__timeFilter(device_time)\n  AND battery_level IS NOT NULL\n  AND node_id IN ($nodeID)\nGROUP BY\n  device_time\nORDER BY\n  device_time;",
+          "rawSql": "SELECT\n  dm.time,\n  dm.battery_level\nFROM device_metrics dm\nWHERE $__timeFilter(dm.time)\n  AND dm.battery_level IS NOT NULL\n  AND dm.node_id IN ($nodeID)\nORDER BY dm.time;",
           "refId": "A",
           "sql": {
             "columns": [
@@ -1750,7 +1752,7 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "palette-classic"
+            "mode": "thresholds"
           },
           "custom": {
             "axisBorderShow": false,
@@ -1762,7 +1764,7 @@
             "barWidthFactor": 0.6,
             "drawStyle": "line",
             "fillOpacity": 5,
-            "gradientMode": "none",
+            "gradientMode": "scheme",
             "hideFrom": {
               "legend": false,
               "tooltip": false,
@@ -1782,12 +1784,10 @@
               "mode": "none"
             },
             "thresholdsStyle": {
-              "mode": "area"
+              "mode": "dashed+area"
             }
           },
           "mappings": [],
-          "max": 2,
-          "min": 0,
           "thresholds": {
             "mode": "percentage",
             "steps": [
@@ -1796,12 +1796,16 @@
                 "value": 0
               },
               {
+                "color": "orange",
+                "value": 20
+              },
+              {
                 "color": "yellow",
-                "value": 40
+                "value": 50
               },
               {
                 "color": "green",
-                "value": 60
+                "value": 80
               }
             ]
           },
@@ -1847,7 +1851,7 @@
           "legendFormat": "{{long_name}} | Model: {{hardware_model}} | Role: {{role}}",
           "range": true,
           "rawQuery": true,
-          "rawSql": "SELECT\n  device_time AS time,\n  voltage\nFROM\n  node_telemetry\nWHERE\n  $__timeFilter(device_time)\n  AND voltage IS NOT NULL\n  AND node_id IN ($nodeID)\nGROUP BY\n  device_time\nORDER BY\n  device_time;",
+          "rawSql": "SELECT\n  dm.time,\n  dm.voltage\nFROM device_metrics dm\nWHERE $__timeFilter(dm.time)\n  AND dm.voltage IS NOT NULL\n  AND dm.node_id IN ($nodeID)\nORDER BY dm.time;",
           "refId": "A",
           "sql": {
             "columns": [
@@ -2114,8 +2118,8 @@
     "list": [
       {
         "current": {
-          "text": "≈ (2956809808)",
-          "value": "2956809808"
+          "text": "🧁BagelBakery_Zeitz🥯 (2271592749)",
+          "value": "2271592749"
         },
         "datasource": {
           "type": "mysql",
@@ -2162,6 +2166,6 @@
   "timezone": "",
   "title": "Node Übersicht",
   "uid": "58b708bf-3653-4992-8bae-d3b859e74a0d",
-  "version": 70,
+  "version": 83,
   "weekStart": "monday"
 }
