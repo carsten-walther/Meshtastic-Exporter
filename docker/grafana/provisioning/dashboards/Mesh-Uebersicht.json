@@ -868,7 +868,7 @@
         "pieType": "donut",
         "reduceOptions": {
           "calcs": [],
-          "fields": "/.*/",
+          "fields": "/^count$/",
           "values": true
         },
         "tooltip": {
@@ -888,7 +888,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT\n  portnum,\n  COUNT(*) as count\nFROM\n  mesh_packet_metrics\nWHERE\n  $__timeFilter(time)\n  AND source_id IN ($nodeID)\nGROUP BY\n  portnum\nORDER BY\n  time DESC;",
+          "rawSql": "SELECT\n  portnum,\n  COUNT(*) as count\nFROM mesh_packet_metrics\nWHERE $__timeFilter(time)\n  AND source_id IN ($nodeID)\n  AND portnum IS NOT NULL\nGROUP BY portnum\nORDER BY COUNT(*) DESC;",
           "refId": "A",
           "sql": {
             "columns": [
@@ -1314,7 +1314,9 @@
       {
         "allowCustomValue": false,
         "current": {
-          "text": "All",
+          "text": [
+            "All"
+          ],
           "value": [
             "$__all"
           ]
@@ -1339,13 +1341,13 @@
     ]
   },
   "time": {
-    "from": "now-15m",
+    "from": "now-1h",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "",
   "title": "Mesh Übersicht",
   "uid": "cewd4hhhj2i9sa",
-  "version": 50,
+  "version": 51,
   "weekStart": "monday"
 }
